@@ -490,7 +490,6 @@ def scn_bond_mask(seq):
     """ Inputs: 
         * seqs: (length). iterable of 1-letter aa codes of a protein
         Outputs: (L, 14) maps point to bond length
-
     """ 
     return torch.tensor([SUPREME_INFO[aa]['bond_mask'] for aa in seq])
 
@@ -501,7 +500,6 @@ def scn_angle_mask(seq, angles):
         * angles: (length, 12). [phi, psi, omega, b_angle(n_ca_c), b_angle(ca_c_n), b_angle(c_n_ca), 6_scn_torsions]
         Outputs: (L, 14) maps point to theta and dihedral.
                  first angle is theta, second is dihedral
-
     """ 
     device = angles.device
     angles = angles.cpu()
@@ -542,7 +540,6 @@ def scn_index_mask(seq):
         * seq: (length). iterable of 1-letter aa codes of a protein
         Outputs: (L, 11, 3) maps point to theta and dihedral.
                  first angle is theta, second is dihedral
-
     """ 
     idxs = torch.tensor([SUPREME_INFO[aa]['idx_mask'] for aa in seq])
     return rearrange(idxs, 'l s d -> d l s')
@@ -558,12 +555,11 @@ def build_scaffolds(seq, angles, device="auto"):
                   * (L, 3) bond angles
                   * (L, 6) sidechain angles
         Outputs:
-        * cloud_mask: (L, 14) mask of points that should be converted to coords 
-        * point_ref_mask: (L, 3, 11) maps point (except n-ca-c) to idxs of
+        * cloud_mask: (14, L) mask of points that should be converted to coords 
+        * point_ref_mask: (L, 11, 3) maps point (except n-ca-c) to idxs of
                                      previous 3 points in the coords array
-        * angles_mask: (2, L, 14) maps point to theta and dihedral
-        * bond_mask: (L, 14) gives the length of the bond originating that atom
-        NOTE: convert BB_BUILD_INFO items to tensors in advance 
+        * angles_mask: (2, 14, L) maps point to theta and dihedral
+        * bond_mask: (14, L) gives the length of the bond originating that atom
     """
     # auto infer device
     if device == "auto":
@@ -577,10 +573,10 @@ def build_scaffolds(seq, angles, device="auto"):
      
     bond_mask = torch.tensor(scn_bond_mask(seq)).float().to(device)
     # return all in a dict
-    return {"cloud_mask": cloud_mask, 
+    return {"cloud_mask":     cloud_mask, 
             "point_ref_mask": point_ref_mask,
-            "angles_mask": angles_mask,
-            "bond_mask": bond_mask}
+            "angles_mask":    angles_mask,
+            "bond_mask":      bond_mask }
 
 
 if __name__ == "__main__":

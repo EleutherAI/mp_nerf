@@ -79,11 +79,9 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     coords = torch.zeros(length, 14, 3, device=device)
 
     # do first AA
-    c_vec = np.pi - angles_mask[0, 0, 2]
-    # coords[0, 0, -1] += 0.1
     coords[0, 1] = coords[0, 0] + torch.tensor([1, 0, 0], device=device).float() * BB_BUILD_INFO["BONDLENS"]["n-ca"] 
-    coords[0, 2] = coords[0, 1] + torch.tensor([torch.cos(c_vec),
-                                                torch.sin(c_vec),
+    coords[0, 2] = coords[0, 1] + torch.tensor([torch.cos(np.pi - angles_mask[0, 0, 2]),
+                                                torch.sin(np.pi - angles_mask[0, 0, 2]),
                                                 0.], device=device).float() * BB_BUILD_INFO["BONDLENS"]["ca-c"]
     
     # starting positions (in the x,y plane) and normal vector [0,0,1]
@@ -106,9 +104,7 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     coords[:, 3] = mp_nerf_torch(coords[:, 0],
                                    coords[:, 1],
                                    coords[:, 2],
-                                   bond_mask[:, 0], thetas, dihedrals)[:]
-    # if True:
-    #     return coords, cloud_mask
+                                   bond_mask[:, 0], thetas, dihedrals)
 
     #########
     # sequential pass to join fragments
@@ -122,29 +118,27 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     # no norm here since vectors are norm=1
 
     for i in range(1, length):
-        # get offset from previous n position
-        offset = coords[i-1, 3].unsqueeze(0)
         # part of rotation matrix corresponding to destin - 3 orthogonals
-        # we know the norm are the bond lengths
-        v1_d  = coords[i-1, 3] - coords[i-1, 2]
-        v2_d  = coords[i-1, 2] - coords[i-1, 1]
+        # v1 = C-N, v2 = CA-C || we know the norm are the bond lengths
+        v1_d, v2_d = coords[i-1, [3,2]] - coords[i-1, [2,1]]
+        # v2_d  = coords[i-1, 2] - coords[i-1, 1]
         v3_d  = torch.cross(v1_d, v2_d, dim=-1)
         v2_d_ready  = torch.cross(v3_d, v1_d, dim=-1)
-        mat_destin  = torch.stack([v1_d, v2_d_ready, v3_d], dim=-1)
-        mat_destin /= torch.norm(mat_destin, dim=-2, keepdim=True)
+        mat_destin  = torch.stack([v1_d, v2_d_ready, v3_d], dim=0)
+        mat_destin /= torch.norm(mat_destin, dim=-1, keepdim=True)
         # get rotation matrix
         # rotate  = torch.matmul(mat_destin, mat_origin.t()).t()
-        rotate  = torch.matmul(mat_origin, mat_destin.t())
+        rotate  = torch.matmul(mat_origin, mat_destin)
         rotate /= torch.norm(rotate, dim=-1, keepdim=True)
-        # move coords
-        coords[i, :4] = torch.matmul(coords[i, :4], rotate) + offset
+        # move coords and add offset from previous aa
+        coords[i, :4] = torch.matmul(coords[i, :4], rotate) + coords[i-1, 3].unsqueeze(0)
 
     #########
     # parallel sidechain - do the oxygen, c-beta and side chain
     #########
     for i in range(3,14):
         level_mask = cloud_mask[:, i]
-        thetas, dihedrals = angles_mask[:, level_mask, i]
+        # thetas, dihedrals = angles_mask[:, level_mask, i]
         idx_a, idx_b, idx_c = point_ref_mask[:, level_mask, i-3]
         # to place C-beta, we need the carbons from prev res - not available for the 1st res
         if i == 4:
@@ -160,7 +154,7 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
         coords[level_mask, i] = mp_nerf_torch(coords_a,
                                                 coords[level_mask, idx_b],
                                                 coords[level_mask, idx_c],
-                                                bond_mask[level_mask, i], thetas, dihedrals)
+                                                bond_mask[level_mask, i], *angles_mask[:, level_mask, i])
     
     return coords, cloud_mask
 
