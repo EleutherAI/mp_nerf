@@ -3,13 +3,16 @@
 
 ## TL;DR
 
-**NeRF** is a method for finding the 4th point in a polymer (ex: abcd) given the previous 3 points (ex: abc), the angle (bcd) and the dihedral angle (abc - bcd).
-The current implementations fold polymers in sequence (ex: for a protein it would be: N-CA-C-O-CB-side_chain_1-N-CA-C-O-CB-side_chain_2...N-CA-C-O-CB-side_chain_n)
-Since AAs in proteins are only linked by the backbone (N-CA-C-N-CA-C-...) what we do is to fold the backbone in 3 passes (1 for N, for CA and for C). Then we link all those fragments into 1 chain (the sequential pass) and then we build all the sidechains in parallel + the Oxygen in the carbonyl group.
-This allows for great speedups since many cross-products, normalizations, rotations, ... can be parallelized in CPU or in GPU.
+* **NeRF** is a method for finding the 4th point in a polymer (ex: abcd) given the previous 3 points (ex: abc), the angle (bcd) and the dihedral angle (abc - bcd).
+
+* The current implementations fold polymers in sequence (ex: for a protein it would be: N-CA-C-O-CB-side_chain_1-N-CA-C-O-CB-side_chain_2...N-CA-C-O-CB-side_chain_n)
+
+* Since AAs in proteins are only linked by the backbone (N-CA-C-N-CA-C-...) what we do is to fold the backbone in 3 passes (1 for N, for CA and for C). Then we link all those fragments into 1 chain (the sequential pass) and then we build all the sidechains in parallel + the Oxygen in the carbonyl group.
+
+* This allows for great speedups since many cross-products, normalizations, rotations, ... can be parallelized in CPU or in GPU.
 The current speedup is about 100x against the SoTA that was published in July, 2020. 
 
-Some related info: 
+**Some related info**:
 * what is the protein backbone: https://www.google.com/search?q=protein+backbone+dihedral&sxsrf=ALeKk02Aud_zF4Aq-uhV4SpGTi-IhU6Inw:1613231813413&source=lnms&tbm=isch&sa=X&ved=2ahUKEwiHw7bpnOfuAhUYaRUIHa7EC0kQ_AUoAXoECAoQAw&biw=1354&bih=842
 * previous sota (some of their figures illustrate their algo): https://www.researchgate.net/publication/343073419_High-performance_transformation_of_protein_structure_representation_from_internal_to_Cartesian_coordinates
 * another parallel NeRF implementation from 2019 that does it fragment-wise: https://github.com/aqlaboratory/pnerf (we take the fragment concept to the extreme and do it for every aa and for all the side chains. also we use pytorch instead of TF).
