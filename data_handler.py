@@ -510,7 +510,7 @@ def scn_angle_mask(seq, angles):
     torsion_mask = torch.tensor([SUPREME_INFO[aa]['torsion_mask'] for aa in seq]).float()
     # fill masks with angle values
     theta_mask[:, 0] = angles[:, 4] # ca_c_n
-    theta_mask[:, 1] = angles[:, 5] # c_n_ca
+    theta_mask[1:, 1] = angles[:-1, 5] # c_n_ca
     theta_mask[:, 2] = angles[:, 3] # n_ca_c
     theta_mask[:, 3] = BB_BUILD_INFO["BONDANGS"]["ca-c-o"]
     # backbone_torsions

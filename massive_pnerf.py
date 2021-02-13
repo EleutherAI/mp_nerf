@@ -79,7 +79,7 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     coords = torch.zeros(length, 14, 3, device=device)
 
     # do first AA
-    c_vec = BB_BUILD_INFO["BONDLENS"]["ca-c"] * (np.pi - angles_mask[0, 0, 2])
+    c_vec = np.pi - angles_mask[0, 0, 2]
     # coords[0, 0, -1] += 0.1
     coords[0, 1] = coords[0, 0] + torch.tensor([1, 0, 0], device=device).float() * BB_BUILD_INFO["BONDLENS"]["n-ca"] 
     coords[0, 2] = coords[0, 1] + torch.tensor([torch.cos(c_vec),
@@ -107,6 +107,9 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
                                    coords[:, 1],
                                    coords[:, 2],
                                    bond_mask[:, 0], thetas, dihedrals)[:]
+    # if True:
+    #     return coords, cloud_mask
+
     #########
     # sequential pass to join fragments
     #########
@@ -130,8 +133,9 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
         mat_destin  = torch.stack([v1_d, v2_d_ready, v3_d], dim=-1)
         mat_destin /= torch.norm(mat_destin, dim=-2, keepdim=True)
         # get rotation matrix
-        rotate  = torch.matmul(mat_destin, mat_origin.t()).t() 
-        rotate /= torch.norm(rotate, dim=-2, keepdim=True)
+        # rotate  = torch.matmul(mat_destin, mat_origin.t()).t()
+        rotate  = torch.matmul(mat_origin, mat_destin.t())
+        rotate /= torch.norm(rotate, dim=-1, keepdim=True)
         # move coords
         coords[i, :4] = torch.matmul(coords[i, :4], rotate) + offset
 
