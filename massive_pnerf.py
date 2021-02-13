@@ -128,7 +128,9 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
         mat_destin /= torch.norm(mat_destin, dim=-1, keepdim=True)
         # get rotation matrix
         # rotate  = torch.matmul(mat_destin, mat_origin.t()).t()
+        # print("modified rotate", rotate)
         rotate  = torch.matmul(mat_origin, mat_destin)
+        # print("right rotate", rotate)
         rotate /= torch.norm(rotate, dim=-1, keepdim=True)
         # move coords and add offset from previous aa
         coords[i, :4] = torch.matmul(coords[i, :4], rotate) + coords[i-1, 3].unsqueeze(0)
