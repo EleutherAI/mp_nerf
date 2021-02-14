@@ -3,14 +3,16 @@
 
 ## TL;DR
 
+* *We reconstruct coordinates from angles >200x faster than sota (in cpu whereas sota requires cuda-gpu)*
+
 * **NeRF** is a method for finding the 4th point in a polymer (ex: abcd) given the previous 3 points (ex: abc), the angle (bcd) and the dihedral angle (abc - bcd).
 
-* The current implementations fold polymers in sequence (ex: for a protein it would be: N-CA-C-O-CB-side_chain_1-N-CA-C-O-CB-side_chain_2...N-CA-C-O-CB-side_chain_n)
+* The current sota implementations fold polymers in sequence (ex: for a protein it would be: N-CA-C-O-CB-side_chain_1-N-CA-C-O-CB-side_chain_2...N-CA-C-O-CB-side_chain_n)
 
 * Since AAs in proteins are only linked by the backbone (N-CA-C-N-CA-C-...) what we do is to fold the backbone in 3 parallel passes (1 for N, for CA and for C). Then we link all those fragments into 1 chain (the sequential pass) and then we build all the sidechains in parallel + the Oxygen in the carbonyl group.
 
 * This allows for great speedups since many cross-products, normalizations, rotations, ... can be parallelized in CPU or in GPU.
-The current speedup is about 100x against the SoTA that was published in July, 2020. 
+The current speedup is about 200x against the SoTA that was published in July, 2020. 
 
 **Some related info**:
 * original NERF paper from 2005: http://www.entsphere.com/pub/pdf/Practical%20conversion%20from%20torsion%20space%20to%20cartesian%20space%20for%20in%20silico%20protein%20synthesis.pdf
@@ -21,7 +23,7 @@ The current speedup is about 100x against the SoTA that was published in July, 2
 
 
 ## Results: 
-* On a 330 AA protein:
+* On a 500 AA protein (for comparison SOTA does 7seconds for 500 alanines - which is the smallest AA) - so ours is **>200x faster**
 <center><img src="experiments/profiler_capture_330.png"></center>
 
 Considerations:

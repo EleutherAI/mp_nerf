@@ -30,6 +30,34 @@ def dihedral_torch(c1, c2, c3, c4):
                         (  torch.cross(u1,u2, dim=-1) * torch.cross(u2, u3, dim=-1) ).sum(dim=-1) )
 
 
+def get_axis_matrix(a, b, c):
+    """ Gets an orthonomal basis as a matrix of [e1, e2, e3]. 
+        Useful for constructing rotation matrices between planes
+        according to the first answer here:
+        https://math.stackexchange.com/questions/1876615/rotation-matrix-from-plane-a-to-b
+        Inputs:
+        * a: (batch, 3) or (3, ). point(s) of the plane
+        * b: (batch, 3) or (3, ). point(s) of the plane
+        * c: (batch, 3) or (3, ). point(s) of the plane
+        Outputs: orthonomal basis as a matrix of [e1, e2, e3]. calculated as: 
+            * e1_ = (c-b)
+            * e2_proto = (b-a)
+            * e3_ = e1_ ^ e2_proto
+            * e2_ = e3_ ^ e1_
+            * basis = normalize_by_vectors( [e1_, e2_, e3_] )
+        Note: Could be done more by Grahm-Schmidt and extend to N-dimensions
+              but this is faster and more intuitive for 3D.
+    """
+    v1_ = c - b 
+    v2_ = b - a
+    v3_ = torch.cross(v1_, v2_, dim=-1)
+    v2_ready = torch.cross(v3_, v1_, dim=-1)
+    basis    = torch.stack([v1_, v2_ready, v3_], dim=-2)
+    basis   /= torch.norm(basis, dim=-1, keepdim=True) 
+    return basis
+
+
+
 def mp_nerf_torch(a, b, c, l, theta, chi):
     """ Custom Natural extension of Reference Frame. 
         Inputs:
@@ -109,27 +137,15 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     #########
     # sequential pass to join fragments
     #########
-    # part of rotation matrix corresponding to origin - 3 orthogonals
-    v1_o  = coords[0, 0] - init_b[0] # we know the norm is 1. # v1_o /= torch.norm(v1_o)
-    v2_o  = (init_b[0] - init_a[0]) / np.sqrt(2) # we know the norm # / torch.norm(v2_o) 
-    v3_o  = torch.cross(v1_o, v2_o, dim=-1)
-    v2_o_ready = torch.cross(v3_o, v1_o, dim=-1)
-    mat_origin = torch.stack([v1_o, v2_o_ready, v3_o], dim=-2).t() 
-    # no matrix norm here since vectors are norm=1
-
-    # part of rotation matrix corresponding to destins - 3 orthogonals
-
-    # v1 = C-N, v2 = CA-C || we know the norm are the bond lengths
-    v1_d = coords[:-1, 3] - coords[:-1, 2]
-    v2_d  = coords[:-1, 2] - coords[:-1, 1]
-    v3_d  = torch.cross(v1_d, v2_d, dim=-1)
-    v2_d_ready   = torch.cross(v3_d, v1_d, dim=-1)
-    mat_destins  = torch.stack([v1_d, v2_d_ready, v3_d], dim=-2)
-    mat_destins /= torch.norm(mat_destins, dim=-1, keepdim=True) # (L)
+    # part of rotation mat corresponding to origin - 3 orthogonals
+    mat_origin  = get_axis_matrix(init_a[0], init_b[0], coords[0, 0])
+    # part of rotation mat corresponding to destins || a, b, c = CA, C, N+1
+    # (L-1) since the first is in the origin already 
+    mat_destins = get_axis_matrix(coords[:-1, 1], coords[:-1, 2], coords[:-1, 3])
 
     # get rotation matrices from origins
     # https://math.stackexchange.com/questions/1876615/rotation-matrix-from-plane-a-to-b
-    rotations  = torch.matmul(mat_origin, mat_destins)
+    rotations  = torch.matmul(mat_origin.t(), mat_destins)
     rotations /= torch.norm(rotations, dim=-1, keepdim=True)
 
     # iteratively join fragments and build the chain backbone
