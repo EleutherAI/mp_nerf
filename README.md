@@ -23,13 +23,13 @@ The current speedup is about 200x against the SoTA that was published in July, 2
 
 
 ## Results: 
-* On a 500 AA protein (for comparison SOTA does 7seconds for 500 alanines - which is the smallest AA) - so ours is **>200x faster**
+* On a 500 AA protein we do **32ms** (for comparison SOTA does **7 seconds** for 500 alanines - which is the smallest AA) - so ours is **>200x faster**
 <center><img src="experiments/profiler_capture_500.png"></center>
 
 Considerations:
 * Only CPU execution (i'll run gpu tests later today)
-* actual algorithm is about 1/3 of time: sum(mp_nerf_torch, norm, matmul, ..)
-* about 1/2 of time is spent in memory-access patterns, so ideally 2x from here would be possible by optimizing it
+* actual algorithm is about 1/2 of time: sum(mp_nerf_torch, norm, matmul, ..)
+* about 1/2 of time is spent in memory-access patterns and the sequential `for loop`, so ideally 2x from here would be possible by optimizing it or running the sequential loop in cython / numba / whatever
 * total profiler time should be multiplied by 0.63 to see real time (see execution above without profiler). Profiling slows down the code.
 
 

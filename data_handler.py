@@ -570,7 +570,7 @@ def scn_index_mask(seq):
     return rearrange(idxs, 'l s d -> d l s')
 
 
-def build_scaffolds(seq, angles, device="auto"):
+def build_scaffolds_from_scn_angles(seq, angles, device="auto"):
     """ Builds scaffolds for fast access to data
         Inputs: 
         * seq: string of aas (1 letter code)
