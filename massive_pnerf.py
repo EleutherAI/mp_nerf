@@ -114,24 +114,32 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     v2_o  = (init_b[0] - init_a[0]) / np.sqrt(2) # we know the norm # / torch.norm(v2_o) 
     v3_o  = torch.cross(v1_o, v2_o, dim=-1)
     v2_o_ready = torch.cross(v3_o, v1_o, dim=-1)
-    mat_origin = torch.stack([v1_o, v2_o_ready, v3_o], dim=-1) 
-    # no norm here since vectors are norm=1
+    mat_origin = torch.stack([v1_o, v2_o_ready, v3_o], dim=-2).t() 
+    # no matrix norm here since vectors are norm=1
 
-    for i in range(1, length):
-        # part of rotation matrix corresponding to destin - 3 orthogonals
-        # v1 = C-N, v2 = CA-C || we know the norm are the bond lengths
-        v1_d, v2_d = coords[i-1, [3,2]] - coords[i-1, [2,1]]
-        # v2_d  = coords[i-1, 2] - coords[i-1, 1]
-        v3_d  = torch.cross(v1_d, v2_d, dim=-1)
-        v2_d_ready  = torch.cross(v3_d, v1_d, dim=-1)
-        mat_destin  = torch.stack([v1_d, v2_d_ready, v3_d], dim=0)
-        mat_destin /= torch.norm(mat_destin, dim=-1, keepdim=True)
-        # get rotation matrix
-        # rotate  = torch.matmul(mat_destin, mat_origin.t()).t()
-        rotate  = torch.matmul(mat_origin, mat_destin)
-        rotate /= torch.norm(rotate, dim=-1, keepdim=True)
+    # part of rotation matrix corresponding to destins - 3 orthogonals
+
+    # v1 = C-N, v2 = CA-C || we know the norm are the bond lengths
+    v1_d = coords[:-1, 3] - coords[:-1, 2]
+    v2_d  = coords[:-1, 2] - coords[:-1, 1]
+    v3_d  = torch.cross(v1_d, v2_d, dim=-1)
+    v2_d_ready   = torch.cross(v3_d, v1_d, dim=-1)
+    mat_destins  = torch.stack([v1_d, v2_d_ready, v3_d], dim=-2)
+    mat_destins /= torch.norm(mat_destins, dim=-1, keepdim=True) # (L)
+
+    # get rotation matrices from origins
+    # https://math.stackexchange.com/questions/1876615/rotation-matrix-from-plane-a-to-b
+    rotations  = torch.matmul(mat_origin, mat_destins)
+    rotations /= torch.norm(rotations, dim=-1, keepdim=True)
+
+    # iteratively join fragments and build the chain backbone
+    for i in range(1, length):        
         # move coords and add offset from previous aa
-        coords[i, :4] = torch.matmul(coords[i, :4], rotate) + coords[i-1, 3].unsqueeze(0)
+        coords[i, :4] = torch.matmul(coords[i, :4], rotations[i-1]) + coords[i-1, 3].unsqueeze(0)
+        # rotate rotation matrix according to previous rotation
+        if i < length-1:
+            rotations[i] = torch.matmul(rotations[i], rotations[i-1])
+        
 
     #########
     # parallel sidechain - do the oxygen, c-beta and side chain

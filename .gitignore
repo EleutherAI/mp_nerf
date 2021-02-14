@@ -5,6 +5,7 @@ __pycache__/
 
 
 # to ignore
+.DS_Store
 sidechainnet_data/*
 *.pkl
 
