@@ -405,10 +405,13 @@ SC_BUILD_INFO = {
 
 BB_BUILD_INFO = {
     "BONDLENS": {
-        'n-ca': 1.442,
-        'ca-c': 1.498,
-        'c-n': 1.379,
-        'c-o': 1.229,  # From parm10.dat
+        # the updated is according to crystal data from 1DPE_1_A and validated with other structures
+        # the commented is the sidechainnet one
+        'n-ca': 1.4664931, # 1.442, 
+        'ca-c': 1.524119,  # 1.498,
+        'c-n': 1.3289373,  # 1.379,
+        'c-o': 1.229,  # From parm10.dat || huge variability according to structures
+        # we get 1.3389416 from 1DPE_1_A but also 1.2289 from 2F2H_d2f2hf1
         'c-oh': 1.364
     },  # From parm10.dat, for OXT
     # For placing oxygens
