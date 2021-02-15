@@ -93,14 +93,14 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     """ Calcs coords of a protein given it's
         sequence and internal angles.
         Inputs: 
-        * seq: string of aas (1 letter corde)
-        * angles: (L, 12) tensor containing the internal angles.
-                  Distributed as follows (following sidechainnet convention):
-                  * (L, 3) for torsion angles
-                  * (L, 3) bond angles
-                  * (L, 6) sidechain angles
-        Output: (L, 14, 3): coordinates. 
-        NOTE: convert BB_BUILD_INFO items to tensors in advance 
+        * seqs: iterable (string, list...) of aas (1 letter corde)
+        * cloud_mask: (L, 14) mask of points that should be converted to coords 
+        * point_ref_mask: (3, L, 11) maps point (except n-ca-c) to idxs of
+                                     previous 3 points in the coords array
+        * angles_mask: (2, 14, L) maps point to theta and dihedral
+        * bond_mask: (L, 14) gives the length of the bond originating that atom
+
+        Output: (L, 14, 3) and (L, 14) coordinates and cloud_mask
     """
     length = len(seq)
     # create coord wrapper

@@ -400,6 +400,18 @@ SC_BUILD_INFO = {
         'torsion-names': ['C-N-CA-CB', 'N-CA-CB-CG1', 'N-CA-CB-CG2'],
         'torsion-types': ['C -N -CX-3C', 'N -CX-3C-CT', 'N -CX-3C-CT'],
         'torsion-vals': ['p', 'p', 'p']
+    },
+    '_': {
+        'angles-names': [],
+        'angles-types': [],
+        'angles-vals': [],
+        'atom-names': [],
+        'bonds-names': [],
+        'bonds-types': [],
+        'bonds-vals': [],
+        'torsion-names': [],
+        'torsion-types': [],
+        'torsion-vals': []
     }
 }
 
@@ -443,9 +455,10 @@ def make_bond_mask(aa):
     mask[1] = BB_BUILD_INFO["BONDLENS"]['n-ca']
     mask[2] = BB_BUILD_INFO["BONDLENS"]['ca-c']
     mask[3] = BB_BUILD_INFO["BONDLENS"]['c-o']
-    # sidechain
-    for i,bond in enumerate(SC_BUILD_INFO[aa]['bonds-vals']):
-        mask[4+i] = bond
+    # sidechain - except padding token 
+    if aa in SC_BUILD_INFO.keys():
+        for i,bond in enumerate(SC_BUILD_INFO[aa]['bonds-vals']):
+            mask[4+i] = bond
     return mask
 
 def make_theta_mask(aa):
@@ -502,7 +515,7 @@ SUPREME_INFO = {k: {"cloud_mask": make_cloud_mask(k),
                     "torsion_mask": make_torsion_mask(k),
                     "idx_mask": make_idx_mask(k),
                     } 
-                for k in "ARNDCQEGHILKMFPSTWYV"}
+                for k in "ARNDCQEGHILKMFPSTWYV_"}
 
 # @jit()
 def scn_cloud_mask(seq):
@@ -583,11 +596,11 @@ def build_scaffolds_from_scn_angles(seq, angles, device="auto"):
                   * (L, 3) bond angles
                   * (L, 6) sidechain angles
         Outputs:
-        * cloud_mask: (14, L) mask of points that should be converted to coords 
-        * point_ref_mask: (L, 11, 3) maps point (except n-ca-c) to idxs of
+        * cloud_mask: (batch, 14, L) mask of points that should be converted to coords 
+        * point_ref_mask: (3, batch, L, 11) maps point (except n-ca-c) to idxs of
                                      previous 3 points in the coords array
-        * angles_mask: (2, 14, L) maps point to theta and dihedral
-        * bond_mask: (14, L) gives the length of the bond originating that atom
+        * angles_mask: (2, batch, 14, L) maps point to theta and dihedral
+        * bond_mask: (batch, 14, L) gives the length of the bond originating that atom
     """
     # auto infer device
     if device == "auto":
