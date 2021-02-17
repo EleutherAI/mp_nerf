@@ -33,6 +33,82 @@ import numpy as np
 from numba import jit
 from einops import repeat, rearrange
 
+######################
+## structural utils ##
+######################
+
+def get_dihedral(c1, c2, c3, c4):
+    """ Returns the dihedral angle in radians.
+        Will use atan2 formula from: 
+        https://en.wikipedia.org/wiki/Dihedral_angle#In_polymer_physics
+        Inputs: 
+        * c1: (batch, 3) or (3,)
+        * c2: (batch, 3) or (3,)
+        * c3: (batch, 3) or (3,)
+        * c4: (batch, 3) or (3,)
+    """
+    u1 = c2 - c1
+    u2 = c3 - c2
+    u3 = c4 - c3
+
+    return torch.atan2( ( (torch.norm(u2, dim=-1, keepdim=True) * u1) * torch.cross(u2,u3, dim=-1) ).sum(dim=-1) ,  
+                        (  torch.cross(u1,u2, dim=-1) * torch.cross(u2, u3, dim=-1) ).sum(dim=-1) )
+
+
+def get_angle(c1, c2, c3):
+    """ Returns the angle in radians.
+        Inputs: 
+        * c1: (batch, 3) or (3,)
+        * c2: (batch, 3) or (3,)
+        * c3: (batch, 3) or (3,)
+    """
+    u1 = c2 - c1
+    u2 = c3 - c2
+
+    # don't use trad arccos since it gets the "smallest angle", 
+    # not necessarily the one we want
+    # return torch.acos( (u1*u2).sum(dim=-1) / (torch.norm(u1, dim=-1)*torch.norm(u2, dim=-1)) )+
+
+    # better use atan2 formula: atan2(cross, dot) from here: 
+    # https://johnblackburne.blogspot.com/2012/05/angle-between-two-3d-vectors.html
+
+    # add a minus since we want the angle in reversed order - sidechainnet issues
+    return torch.atan2( torch.norm(torch.cross(u1,u2, dim=-1), dim=-1), 
+                        -(u1*u2).sum(dim=-1) ) 
+
+
+def kabsch_torch(X, Y):
+    """ Kabsch alignment of X into Y. 
+        Assumes X,Y are both (D, N) - usually (3, N)
+    """
+    #  center X and Y to the origin
+    X_ = X - X.mean(dim=-1, keepdim=True)
+    Y_ = Y - Y.mean(dim=-1, keepdim=True)
+    # calculate convariance matrix (for each prot in the batch)
+    C = torch.matmul(X_, Y_.t())
+    # Optimal rotation matrix via SVD - warning! W must be transposed
+    V, S, W = torch.svd(C.detach())
+    # determinant sign for direction correction
+    d = (torch.det(V) * torch.det(W)) < 0.0
+    if d:
+        S[-1]    = S[-1] * (-1)
+        V[:, -1] = V[:, -1] * (-1)
+    # Create Rotation matrix U
+    U = torch.matmul(V, W.t())
+    # calculate rotations
+    X_ = torch.matmul(X_.t(), U).t()
+    # return centered and aligned
+    return X_, Y_
+
+
+def rmsd_torch(X, Y):
+    """ Assumes x,y are both (batch, d, n) - usually (batch, 3, N). """
+    return torch.sqrt( torch.mean((X - Y)**2, axis=(-1, -2)) )
+
+
+############
+### INFO ###
+############
 
 SC_BUILD_INFO = {
     'A': {
@@ -596,11 +672,11 @@ def build_scaffolds_from_scn_angles(seq, angles, device="auto"):
                   * (L, 3) bond angles
                   * (L, 6) sidechain angles
         Outputs:
-        * cloud_mask: (batch, 14, L) mask of points that should be converted to coords 
-        * point_ref_mask: (3, batch, L, 11) maps point (except n-ca-c) to idxs of
+        * cloud_mask: (L, 14 ) mask of points that should be converted to coords 
+        * point_ref_mask: (3, L, 11) maps point (except n-ca-c) to idxs of
                                      previous 3 points in the coords array
-        * angles_mask: (2, batch, 14, L) maps point to theta and dihedral
-        * bond_mask: (batch, 14, L) gives the length of the bond originating that atom
+        * angles_mask: (2, L, 14) maps point to theta and dihedral
+        * bond_mask: (L, 14) gives the length of the bond originating that atom
     """
     # auto infer device
     if device == "auto":
@@ -618,6 +694,69 @@ def build_scaffolds_from_scn_angles(seq, angles, device="auto"):
             "point_ref_mask": point_ref_mask,
             "angles_mask":    angles_mask,
             "bond_mask":      bond_mask }
+
+
+#############################
+####### ENCODERS ############
+#############################
+
+
+def modify_scaffolds_with_coords(scaffolds, coords):
+    """ Gets scaffolds and fills in the right data.
+        Inputs: 
+        * scaffolds: dict. as returned by `build_scaffolds_from_scn_angles`
+        * coords: (L, 14, 3). sidechainnet tensor. same device as scaffolds
+        Outputs: corrected scaffolds
+    """
+
+
+    # calculate distances and update: 
+    # N, CA, C
+    scaffolds["bond_mask"][1:, 0] = torch.norm(coords[1:, 0] - coords[:-1, 2], dim=-1) # N
+    scaffolds["bond_mask"][ :, 1] = torch.norm(coords[ :, 1] - coords[:  , 0], dim=-1) # CA
+    scaffolds["bond_mask"][ :, 2] = torch.norm(coords[ :, 2] - coords[:  , 1], dim=-1) # C
+    # O, CB, side chain
+    selector = np.arange(len(coords))
+    for i in range(3, 14):
+        # get indexes
+        idx_a, idx_b, idx_c = scaffolds["point_ref_mask"][:, :, i-3] # (3, L, 11) -> 3 * (L, 11)
+        # correct distances
+        scaffolds["bond_mask"][:, i] = torch.norm(coords[:, i] - coords[selector, idx_c], dim=-1)
+        # get angles
+        scaffolds["angles_mask"][0, :, i] = get_angle(coords[selector, idx_b], 
+                                                      coords[selector, idx_c], 
+                                                      coords[:, i])
+        # handle C-beta, where the C requested is from the previous aa
+        if i == 4:
+            # for 1st residue, use position of the second residue's N
+            first_next_n     = coords[1, :1] # 1, 3
+            # the c requested is from the previous residue
+            main_c_prev_idxs = coords[selector, idx_a][:-1] # (L-1), 3
+            # concat
+            coords_a = torch.cat([first_next_n, main_c_prev_idxs])
+        else:
+            coords_a = coords[selector, idx_a]
+        # get dihedrals
+        scaffolds["angles_mask"][1, :, i] = get_dihedral(coords_a,
+                                                         coords[selector, idx_b], 
+                                                         coords[selector, idx_c], 
+                                                         coords[:, i])
+    # correct angles and dihedrals for backbone 
+    scaffolds["angles_mask"][0, :-1, 0] = get_angle(coords[:-1, 1], coords[:-1, 2], coords[1: , 0]) # ca_c_n
+    scaffolds["angles_mask"][0, 1:,  1] = get_angle(coords[:-1, 2], coords[1:,  0], coords[1: , 1]) # c_n_ca
+    scaffolds["angles_mask"][0,  :,  2] = get_angle(coords[:,   0], coords[ :,  1], coords[ : , 2]) # n_ca_c
+    # phi=f(c-1, n, ca, c) & psi=f(n, ca, c, n+1)
+    # scaffolds["angles_mask"][1, :-1, 0] = get_dihedral(coords[:-1, 2], coords[1:, 0], coords[1:, 1], coords[1:, 2])
+
+    # torsion_mask[:, 0] = angles[:, 1] # n determined by psi of previous
+    # torsion_mask[1:, 1] = angles[:-1, 2] # ca determined by omega of previous
+    # torsion_mask[:, 2] = angles[:, 0] # c determined by phi
+    # torch.tensor([ get_dihedral_torch(*backbones[s, i*3 + 0 : i*3 + 4] )if i < length-1 else np.pi*5/4 \
+    #                              for i in range(length) ])
+
+
+    return scaffolds
+
 
 
 if __name__ == "__main__":

@@ -7,29 +7,6 @@ from einops import repeat
 from data_handler import * 
 
 
-############################
-######## FUNCTIONS #########
-############################
-
-
-def dihedral_torch(c1, c2, c3, c4):
-    """ Returns the dihedral angle in radians.
-        Will use atan2 formula from: 
-        https://en.wikipedia.org/wiki/Dihedral_angle#In_polymer_physics
-        Inputs: 
-        * c1: (batch, 3) or (3,)
-        * c1: (batch, 3) or (3,)
-        * c1: (batch, 3) or (3,)
-        * c1: (batch, 3) or (3,)
-    """
-    u1 = c2 - c1
-    u2 = c3 - c2
-    u3 = c4 - c3
-
-    return torch.atan2( ( (torch.norm(u2, dim=-1, keepdim=True) * u1) * torch.cross(u2,u3, dim=-1) ).sum(dim=-1) ,  
-                        (  torch.cross(u1,u2, dim=-1) * torch.cross(u2, u3, dim=-1) ).sum(dim=-1) )
-
-
 def get_axis_matrix(a, b, c):
     """ Gets an orthonomal basis as a matrix of [e1, e2, e3]. 
         Useful for constructing rotation matrices between planes
