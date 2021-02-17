@@ -745,14 +745,13 @@ def modify_scaffolds_with_coords(scaffolds, coords):
     scaffolds["angles_mask"][0, :-1, 0] = get_angle(coords[:-1, 1], coords[:-1, 2], coords[1: , 0]) # ca_c_n
     scaffolds["angles_mask"][0, 1:,  1] = get_angle(coords[:-1, 2], coords[1:,  0], coords[1: , 1]) # c_n_ca
     scaffolds["angles_mask"][0,  :,  2] = get_angle(coords[:,   0], coords[ :,  1], coords[ : , 2]) # n_ca_c
-    # phi=f(c-1, n, ca, c) & psi=f(n, ca, c, n+1)
-    # scaffolds["angles_mask"][1, :-1, 0] = get_dihedral(coords[:-1, 2], coords[1:, 0], coords[1:, 1], coords[1:, 2])
-
-    # torsion_mask[:, 0] = angles[:, 1] # n determined by psi of previous
-    # torsion_mask[1:, 1] = angles[:-1, 2] # ca determined by omega of previous
-    # torsion_mask[:, 2] = angles[:, 0] # c determined by phi
-    # torch.tensor([ get_dihedral_torch(*backbones[s, i*3 + 0 : i*3 + 4] )if i < length-1 else np.pi*5/4 \
-    #                              for i in range(length) ])
+    
+    # N determined by previous psi = f(n, ca, c, n+1)
+    scaffolds["angles_mask"][1, :-1, 0] = get_dihedral(coords[:-1, 0], coords[:-1, 1], coords[:-1, 2], coords[1:, 0])
+    # CA determined by omega = f(ca, c, n+1, ca+1)
+    scaffolds["angles_mask"][1,  1:, 1] = get_dihedral(coords[:-1, 1], coords[:-1, 2], coords[1:, 0], coords[1:, 1])
+    # C determined by phi = f(c-1, n, ca, c)
+    scaffolds["angles_mask"][1,  1:, 2] = get_dihedral(coords[:-1, 2], coords[1:, 0], coords[1:, 1], coords[1:, 2])
 
 
     return scaffolds
