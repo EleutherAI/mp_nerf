@@ -25,6 +25,7 @@ The current speedup is about 200x against the SoTA that was published in July, 2
 ## Results: 
 * On a 500 AA protein we do **32ms** (for comparison SOTA does **7 seconds** for 500 alanines - which is the smallest AA) - so ours is **>200x faster**
 <center><img src="experiments/profiler_capture_500.png"></center>
+<center><img src="experiments/cumulative_error.png"></center>
 
 Considerations:
 * Only CPU execution (i'll run gpu tests later today)
