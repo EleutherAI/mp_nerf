@@ -647,7 +647,7 @@ def scn_angle_mask(seq, angles):
         # pick previous value for inferred torsions
         for j, val in enumerate(to_pick[i]):
             if val:
-                torsion_mask[i, j] = angles[i, j-1] - np.pi # pick values from last one.
+                torsion_mask[i, j] = torsion_mask[i, j] - np.pi # pick values from last one.
 
     return torch.stack([theta_mask, torsion_mask], dim=0).to(device)
 
@@ -752,7 +752,6 @@ def modify_scaffolds_with_coords(scaffolds, coords):
     scaffolds["angles_mask"][1,  1:, 1] = get_dihedral(coords[:-1, 1], coords[:-1, 2], coords[1:, 0], coords[1:, 1])
     # C determined by phi = f(c-1, n, ca, c)
     scaffolds["angles_mask"][1,  1:, 2] = get_dihedral(coords[:-1, 2], coords[1:, 0], coords[1:, 1], coords[1:, 2])
-
 
     return scaffolds
 

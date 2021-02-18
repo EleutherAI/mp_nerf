@@ -7,7 +7,7 @@ from einops import repeat
 from data_handler import * 
 
 
-def get_axis_matrix(a, b, c):
+def get_axis_matrix(a, b, c, norm=True):
     """ Gets an orthonomal basis as a matrix of [e1, e2, e3]. 
         Useful for constructing rotation matrices between planes
         according to the first answer here:
@@ -30,7 +30,9 @@ def get_axis_matrix(a, b, c):
     v3_ = torch.cross(v1_, v2_, dim=-1)
     v2_ready = torch.cross(v3_, v1_, dim=-1)
     basis    = torch.stack([v1_, v2_ready, v3_], dim=-2)
-    basis   /= torch.norm(basis, dim=-1, keepdim=True) 
+    # normalize if needed
+    if norm:
+        return basis / torch.norm(basis, dim=-1, keepdim=True) 
     return basis
 
 
@@ -81,7 +83,7 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     """
     length = len(seq)
     # create coord wrapper
-    coords = torch.zeros(length, 14, 3, device=device)
+    coords = torch.zeros(length, 14, 3, device=device).float() # .double()
 
     # do first AA
     coords[0, 1] = coords[0, 0] + torch.tensor([1, 0, 0], device=device).float() * BB_BUILD_INFO["BONDLENS"]["n-ca"] 
@@ -90,8 +92,8 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
                                                 0.], device=device).float() * BB_BUILD_INFO["BONDLENS"]["ca-c"]
     
     # starting positions (in the x,y plane) and normal vector [0,0,1]
-    init_a = repeat(torch.tensor([1., 0., 0.]), 'd -> l d', l=length).to(device)
-    init_b = repeat(torch.tensor([0., 1., 0.]), 'd -> l d', l=length).to(device)
+    init_a = repeat(torch.tensor([1., 0., 0.]).float(), 'd -> l d', l=length).to(device)
+    init_b = repeat(torch.tensor([1., 1., 0.]).float(), 'd -> l d', l=length).to(device)
     # do N -> CA. don't do 1st since its done already
     thetas, dihedrals = angles_mask[:, :, 1]
     coords[1:, 1] = mp_nerf_torch(init_a,
@@ -115,7 +117,7 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     # sequential pass to join fragments
     #########
     # part of rotation mat corresponding to origin - 3 orthogonals
-    mat_origin  = get_axis_matrix(init_a[0], init_b[0], coords[0, 0])
+    mat_origin  = get_axis_matrix(init_a[0], init_b[0], coords[0, 0], norm=False)
     # part of rotation mat corresponding to destins || a, b, c = CA, C, N+1
     # (L-1) since the first is in the origin already 
     mat_destins = get_axis_matrix(coords[:-1, 1], coords[:-1, 2], coords[:-1, 3])
@@ -141,21 +143,25 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
         level_mask = cloud_mask[:, i]
         # thetas, dihedrals = angles_mask[:, level_mask, i]
         idx_a, idx_b, idx_c = point_ref_mask[:, level_mask, i-3]
+
         # to place C-beta, we need the carbons from prev res - not available for the 1st res
         if i == 4:
             # for 1st residue, use position of the second residue's N
             first_next_n     = coords[1, :1] # 1, 3
-            # the c requested is from the previous residue
-            main_c_prev_idxs = coords[level_mask, idx_a][:-1] # (L-1), 3
-            # concat
+            # the c requested is from the previous residue - offset boolean mask by one
+            # can't be done with slicing bc glycines are inside chain (dont have cb)
+            main_c_prev_idxs = coords[(level_mask.nonzero().view(-1) - 1), idx_a][1:] # (L-1), 3
+            # concat coords
             coords_a = torch.cat([first_next_n, main_c_prev_idxs])
         else:
             coords_a = coords[level_mask, idx_a]
 
-        coords[level_mask, i] = mp_nerf_torch(coords_a,
-                                                coords[level_mask, idx_b],
-                                                coords[level_mask, idx_c],
-                                                bond_mask[level_mask, i], *angles_mask[:, level_mask, i])
+        coords[level_mask, i] = mp_nerf_torch(coords_a, 
+                                              coords[level_mask, idx_b],
+                                              coords[level_mask, idx_c],
+                                              bond_mask[level_mask, i], *angles_mask[:, level_mask, i])
+
+        
     
     return coords, cloud_mask
 
