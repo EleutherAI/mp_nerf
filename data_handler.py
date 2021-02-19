@@ -647,7 +647,7 @@ def scn_angle_mask(seq, angles):
         # pick previous value for inferred torsions
         for j, val in enumerate(to_pick[i]):
             if val:
-                torsion_mask[i, j] = torsion_mask[i, j] - np.pi # pick values from last one.
+                torsion_mask[i, j] = torsion_mask[i, j-1] - np.pi # pick values from last one.
 
     return torch.stack([theta_mask, torsion_mask], dim=0).to(device)
 
@@ -731,7 +731,7 @@ def modify_scaffolds_with_coords(scaffolds, coords):
             # for 1st residue, use position of the second residue's N
             first_next_n     = coords[1, :1] # 1, 3
             # the c requested is from the previous residue
-            main_c_prev_idxs = coords[selector, idx_a][:-1] # (L-1), 3
+            main_c_prev_idxs = coords[selector[:-1], idx_a[1:]]# (L-1), 3
             # concat
             coords_a = torch.cat([first_next_n, main_c_prev_idxs])
         else:
