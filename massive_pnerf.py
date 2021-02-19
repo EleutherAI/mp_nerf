@@ -164,8 +164,6 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
                                               coords[level_mask, idx_b],
                                               coords[level_mask, idx_c],
                                               bond_mask[level_mask, i], *angles_mask[:, level_mask, i])
-
-        
     
     return coords, cloud_mask
 

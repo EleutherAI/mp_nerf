@@ -14,6 +14,8 @@
 * This allows for great speedups since many cross-products, normalizations, rotations, ... can be parallelized in CPU or in GPU.
 The current speedup is about 200x against the SoTA that was published in July, 2020. 
 
+
+
 **Some related info**:
 * original NERF paper from 2005: http://www.entsphere.com/pub/pdf/Practical%20conversion%20from%20torsion%20space%20to%20cartesian%20space%20for%20in%20silico%20protein%20synthesis.pdf
 * what is the protein backbone: https://www.google.com/search?q=protein+backbone+dihedral&sxsrf=ALeKk02Aud_zF4Aq-uhV4SpGTi-IhU6Inw:1613231813413&source=lnms&tbm=isch&sa=X&ved=2ahUKEwiHw7bpnOfuAhUYaRUIHa7EC0kQ_AUoAXoECAoQAw&biw=1354&bih=842
@@ -23,15 +25,25 @@ The current speedup is about 200x against the SoTA that was published in July, 2
 
 
 ## Results: 
-* On a 500 AA protein we do **32ms** (for comparison SOTA does **7 seconds** for 500 alanines - which is the smallest AA) - so ours is **>200x faster**
-<center><img src="experiments/profiler_capture_500.png"></center>
-<center><img src="experiments/cumulative_error.png"></center>
+
+* **Tests**: n an intel i5 at 2.4 ghz and nvidia 1060 gb
+
+| length   |  they  | us (cpu) |  Nx  | us (gpu)  |
+----------------------------------------------------
+| 114      | 1.17s  | 7ms      | ~167 | 18.3ms    |
+| 300      | 3.5s   | 13ms     | ~269 | 21.5ms    |
+| 500      | 7.5s   | 19ms     | ~400 | 24ms      |
+| 780      | 18s    | 26ms     | ~700 | 26ms      |
+
+* **Profiler Trace (CPU)**:
+<center><img src="experiments/profiler_capture.png"></center>
+<center><img src="experiments/histogram_errors.png"></center>
+<center><img src="experiments/error_evolution.png"></center>
 
 Considerations:
-* Only CPU execution (i'll run gpu tests later today)
-* actual algorithm is about 1/2 of time: sum(mp_nerf_torch, norm, matmul, ..)
+* In the GPU algo, much of the time is spent in the data transfers. 
 * about 1/2 of time is spent in memory-access patterns and the sequential `for loop`, so ideally 2x from here would be possible by optimizing it or running the sequential loop in cython / numba / whatever
-* total profiler time should be multiplied by 0.63 to see real time (see execution above without profiler). Profiling slows down the code.
+* total profiler time should be multiplied by 0.63-0.5 to see real time (see execution above without profiler). Profiling slows down the code.
 
 
 ## Installation:
