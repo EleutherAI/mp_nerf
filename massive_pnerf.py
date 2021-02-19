@@ -129,9 +129,11 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     rotations  = torch.matmul(mat_origin.t(), mat_destins)
     rotations /= torch.norm(rotations, dim=-1, keepdim=True)
 
-    # do rotation concatenation
+    # do rotation concatenation - do for loop in cpu always - faster
+    rotations = rotations.cpu()
     for i in range(1, length-1):        
         rotations[i] = torch.matmul(rotations[i], rotations[i-1])
+    rotations = rotations.to(device)
     # rotate all
     coords[1:, :4] = torch.matmul(coords[1:, :4], rotations)
     # offset each position by cumulative sum at that position
