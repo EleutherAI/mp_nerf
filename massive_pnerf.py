@@ -83,17 +83,17 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     """
     length = len(seq)
     # create coord wrapper
-    coords = torch.zeros(length, 14, 3, device=device).float() # .double()
+    coords = torch.zeros(length, 14, 3, device=device).double() # .double()
 
     # do first AA
-    coords[0, 1] = coords[0, 0] + torch.tensor([1, 0, 0], device=device).float() * BB_BUILD_INFO["BONDLENS"]["n-ca"] 
+    coords[0, 1] = coords[0, 0] + torch.tensor([1, 0, 0], device=device).double() * BB_BUILD_INFO["BONDLENS"]["n-ca"] 
     coords[0, 2] = coords[0, 1] + torch.tensor([torch.cos(np.pi - angles_mask[0, 0, 2]),
                                                 torch.sin(np.pi - angles_mask[0, 0, 2]),
-                                                0.], device=device).float() * BB_BUILD_INFO["BONDLENS"]["ca-c"]
+                                                0.], device=device).double() * BB_BUILD_INFO["BONDLENS"]["ca-c"]
     
     # starting positions (in the x,y plane) and normal vector [0,0,1]
-    init_a = repeat(torch.tensor([1., 0., 0.]).float(), 'd -> l d', l=length).to(device)
-    init_b = repeat(torch.tensor([1., 1., 0.]).float(), 'd -> l d', l=length).to(device)
+    init_a = repeat(torch.tensor([1., 0., 0.]).double(), 'd -> l d', l=length).to(device)
+    init_b = repeat(torch.tensor([1., 1., 0.]).double(), 'd -> l d', l=length).to(device)
     # do N -> CA. don't do 1st since its done already
     thetas, dihedrals = angles_mask[:, :, 1]
     coords[1:, 1] = mp_nerf_torch(init_a,
