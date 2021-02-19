@@ -68,7 +68,7 @@ def mp_nerf_torch(a, b, c, l, theta, chi):
 
 
 def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
-               device=torch.device("cpu")):
+               device=torch.device("cpu"), seq_rot = True):
     """ Calcs coords of a protein given it's
         sequence and internal angles.
         Inputs: 
@@ -129,14 +129,14 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     rotations  = torch.matmul(mat_origin.t(), mat_destins)
     rotations /= torch.norm(rotations, dim=-1, keepdim=True)
 
-    # iteratively join fragments and build the chain backbone
-    for i in range(1, length):        
-        # move coords and add offset from previous aa
-        coords[i, :4] = torch.matmul(coords[i, :4], rotations[i-1]) + coords[i-1, 3].unsqueeze(0)
-        # rotate rotation matrix according to previous rotation
-        if i < length-1:
-            rotations[i] = torch.matmul(rotations[i], rotations[i-1])
-        
+    # do rotation concatenation
+    for i in range(1, length-1):        
+        rotations[i] = torch.matmul(rotations[i], rotations[i-1])
+    # rotate all
+    coords[1:, :4] = torch.matmul(coords[1:, :4], rotations)
+    # offset each position by cumulative sum at that position
+    coords[1:, :4] += torch.cumsum(coords[:-1, 3], dim=0).unsqueeze(-2)
+
 
     #########
     # parallel sidechain - do the oxygen, c-beta and side chain
