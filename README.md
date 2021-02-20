@@ -28,12 +28,12 @@ The current speedup is about 200x against the SoTA that was published in July, 2
 
 * **Tests**: n an intel i5 at 2.4 ghz and nvidia 1060 gb
 
-| length   |  they  | us (cpu) |  Nx  | us (gpu)  |
-----------------------------------------------------
-| 114      | 1.17s  | 7ms      | ~167 | 18.3ms    |
-| 300      | 3.5s   | 13ms     | ~269 | 21.5ms    |
-| 500      | 7.5s   | 19ms     | ~400 | 24ms      |
-| 780      | 18s    | 26ms     | ~700 | 26ms      |
+length   |  they  | us (cpu) |  Nx  | us (gpu) 
+---------|--------|----------|------|-----------
+114      | 1.17s  | 7ms      | ~167 | 18.3ms   
+300      | 3.5s   | 13ms     | ~269 | 21.5ms    
+500      | 7.5s   | 19ms     | ~400 | 24ms      
+780      | 18s    | 26ms     | ~700 | 26ms      
 
 * **Profiler Trace (CPU)**:
 <center><img src="experiments/profiler_capture.png"></center>
