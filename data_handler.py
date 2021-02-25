@@ -30,7 +30,6 @@ warnings.filterwarnings("ignore")
 
 import torch
 import numpy as np 
-from numba import jit
 from einops import repeat, rearrange
 
 ######################
