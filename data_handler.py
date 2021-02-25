@@ -1,5 +1,6 @@
 # Author: Eric Alcaide
 
+
 # A substantial part has been borrowed from
 # https://github.com/jonathanking/sidechainnet
 #
@@ -617,11 +618,11 @@ def scn_angle_mask(seq, angles):
         Outputs: (L, 14) maps point to theta and dihedral.
                  first angle is theta, second is dihedral
     """ 
-    device = angles.device
+    device, precise = angles.device, angles.type()
     angles = angles.cpu()
     # get masks
-    theta_mask   = torch.tensor([SUPREME_INFO[aa]['theta_mask'] for aa in seq]).float()
-    torsion_mask = torch.tensor([SUPREME_INFO[aa]['torsion_mask'] for aa in seq]).float()
+    theta_mask   = torch.tensor([SUPREME_INFO[aa]['theta_mask'] for aa in seq]).type(precise)
+    torsion_mask = torch.tensor([SUPREME_INFO[aa]['torsion_mask'] for aa in seq]).type(precise)
     # fill masks with angle values
     theta_mask[:, 0] = angles[:, 4] # ca_c_n
     theta_mask[1:, 1] = angles[:-1, 5] # c_n_ca
@@ -677,7 +678,8 @@ def build_scaffolds_from_scn_angles(seq, angles, device="auto"):
         * angles_mask: (2, L, 14) maps point to theta and dihedral
         * bond_mask: (L, 14) gives the length of the bond originating that atom
     """
-    # auto infer device
+    # auto infer device and precision
+    precise = angles.type()
     if device == "auto":
         device = angles.device
 
@@ -685,9 +687,9 @@ def build_scaffolds_from_scn_angles(seq, angles, device="auto"):
     
     point_ref_mask = torch.tensor(scn_index_mask(seq)).long().to(device)
      
-    angles_mask = torch.tensor(scn_angle_mask(seq, angles)).float().to(device)
+    angles_mask = torch.tensor(scn_angle_mask(seq, angles)).type(precise).to(device)
      
-    bond_mask = torch.tensor(scn_bond_mask(seq)).float().to(device)
+    bond_mask = torch.tensor(scn_bond_mask(seq)).type(precise).to(device)
     # return all in a dict
     return {"cloud_mask":     cloud_mask, 
             "point_ref_mask": point_ref_mask,
