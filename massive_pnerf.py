@@ -83,7 +83,7 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     """
     # automatic type (float, mixed, double) and size detection
     precise = bond_mask.type()
-    length  = len(seq)
+    length  = cloud_mask.shape[0]
     # create coord wrapper
     coords = torch.zeros(length, 14, 3, device=device).type(precise)
 
@@ -131,7 +131,7 @@ def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
 
     # do rotation concatenation - do for loop in cpu always - faster
     rotations = rotations.cpu()
-    for i in range(1, length-1):        
+    for i in range(1, length-1):
         rotations[i] = torch.matmul(rotations[i], rotations[i-1])
     rotations = rotations.to(device)
     # rotate all
