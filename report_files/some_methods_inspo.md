@@ -13,12 +13,14 @@ This step requires $n * l$ NERF calls where $n$ is the number of points in the m
 
 2. Assembling of backbone fragments
 
-We then join the different fragments by a rototranslation operation. That is, we move the first point of the $N_{+1}$ to the last point of the $N$ minimal structure, and we rotate the $N_{+1}$ structure to match the orientation of the $N$ structure. 
-The sequential pass requires $l-1$ sequential matrix multiplications (where $l$ is the number of minimal structures to assemble) and a cumulative sum of length $l$ ( $ \mathbf{N_{new}}_{i} = \sum_{j=0}^{i} \mathbf{N_{j} $ ).
+We then join the different fragments by a rototranslation operation. That is, we move the first point of the $$N_{+1}$$ to the last point of the $$N$$ minimal structure, and we rotate the $$N_{+1}$$ structure to match the orientation of the $$N$$ structure. 
+The sequential pass requires $$l-1$$ sequential matrix multiplications (where $$l$$ is the number of minimal structures to assemble) and a cumulative sum of length $$l$$
+
+$$Nnew_{i} = \sum_{j=0}^{i} N_{j}$$ .
 
 3. Composition of the ramifications **in parallel**
 
-After the backbone assembling, we perform the calculation of the ramifications, in parallel for all of them. This requires a maximum of $n * l$ NERF calls, where $n$ is the maximum number of points any possible ramification, and $l$ is the number of ramifications. Note that this is an upper bound, since not all ramifications will have the same number of amount, thus many calculations will not be needed in the end.
+After the backbone assembling, we perform the calculation of the ramifications, in parallel for all of them. This requires a maximum of $$n * l$$ NERF calls, where $$n$$ is the maximum number of points any possible ramification, and $$l$$ is the number of ramifications. Note that this is an upper bound, since not all ramifications will have the same number of amount, thus many calculations will not be needed in the end.
 
 
 
@@ -33,7 +35,7 @@ We leave the calculation of all sidechains, including C-beta to the *ramificatio
 Special effort is put in generalizing every possible function for an arbitrary number of cases, so that a unique call to a function can do the required calculations for as many cases as possible, thus achieving a near-perfect usage of the processor native parallel capabilities (CPU-native vector instructions such as SIMD and AVX or GPU massively parallel architecture).
 
 * Concatenation of the backbone:
-    * The calculations for the rotation matrices to join the backbone fragments are decomposed into a rotation from the $N$ to $N_{+1}$ and the rotation from the $N_{0}$ to the ${N}$ minimal structure, thus allowing for the parallelization of the rotation matrices in the base position, leaving a cumulative matrix multiplication as the only sequential part of the algorithm that can not be parallelized.
+    * The calculations for the rotation matrices to join the backbone fragments are decomposed into a rotation from the $N$ to $$N_{+1}$$ and the rotation from the $$N_{0}$$ to the $${N}$$ minimal structure, thus allowing for the parallelization of the rotation matrices in the base position, leaving a cumulative matrix multiplication as the only sequential part of the algorithm that can not be parallelized.
     * The translation operation is implemented as a cummulative sum, accelerating its calculation.
 
 ### Discussion / Design Choices / Future Work / Comments
