@@ -4,7 +4,7 @@ To render nicely go to: [dillinger.io](https://dillinger.io/)
 
 ### General Algorithm
 
-Thhis work introduces a new scheme for the parallelization of the nERF algorithm when applied to polymers. Previous works have explored the division of the polymer in different fragments, the iterative folding for each fragment in parallel, and the concatenation of different fragments. 
+This work introduces a new scheme for the parallelization of the nERF algorithm when applied to polymers. Previous works have explored the division of the polymer in different fragments, the iterative folding for each fragment in parallel, and the concatenation of different fragments. 
 
 Many polymers such as large biomolecules can be divided into a backbone and a sed of ramifications, usually referred to as sidechains. This work takes a parallel scheme similar to the previously described one, but takes it to the extreme by considering only the backbone of the polymer when dividing it in fragments. Since the backbone is usually composed by repeated structures (aminoacid backbone in proteins, pentose and phospate group in nucleic acids, etc), it is natural to consider the minimal repeated unit as a fragment. Therefore, the procedure can be separated into 3 phases: 
 
@@ -24,15 +24,24 @@ $$Nnew_{i} = \sum_{j=0}^{i} N_{j}$$ .
 
 After the backbone assembling, we perform the calculation of the ramifications, in parallel for all of them. This requires a maximum of $$n * l$$ NERF calls, where $$n$$ is the maximum number of points any possible ramification, and $$l$$ is the number of ramifications. Note that this is an upper bound, since not all ramifications will have the same number of amount, thus many calculations will not be needed in the end.
 
+FIGURE 1: Description of the algorithm (coloured balls).
 
-
-### Protein Specifics
+#### Protein Specifics
 
 Since the oxygen atom in the carbonyl group in protein backbones is only linked to the carbon atom, we don't include it in our backbone calculations, but incorporate it as a sidechain addition to the main backbone formed by the N-CA-C atoms of each aminoacid.
 We leave the calculation of all sidechains, including C-beta to the *ramifications* step referenced above.
 
+### Experiments
+We perform 2 experiments in order to benchmark the speed of our algorithm against the previous SOTA and to check the cummulative error that comes with accumulated transformations from internal to cartesian and the reverse mapping (this is of special importantce in algorithms that may use internal coordinates to work with, but that need the conversion functions before and after since the molecular simulation or base representation is in cartesian coordinates)
 
-#### Implementation details
+TABLE 2: Comparison of execution times between previous sota and our implementation
+
+FIGURE 2: Same info as in table 2 but more points so that a clear curve can be observed
+
+FIGURE 3: Cummulative error (RMSD, not 3 axes) as a function of encoding-decoding phases. 
+
+
+### Implementation details
 
 Special effort is put in generalizing every possible function for an arbitrary number of cases, so that a unique call to a function can do the required calculations for as many cases as possible, thus achieving a near-perfect usage of the processor native parallel capabilities (CPU-native vector instructions such as SIMD and AVX or GPU massively parallel architecture).
 
