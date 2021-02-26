@@ -1,5 +1,7 @@
 ## Methods
 
+To render nicely go to: [dillinger.io](https://dillinger.io/)
+
 ### General Algorithm
 
 Thhis work introduces a new scheme for the parallelization of the nERF algorithm when applied to polymers. Previous works have explored the division of the polymer in different fragments, the iterative folding for each fragment in parallel, and the concatenation of different fragments. 
@@ -9,7 +11,7 @@ Many polymers such as large biomolecules can be divided into a backbone and a se
 1. Composition of the minimal repeated structure **in parallel**
 
 For every minimal repeated structure, we initialize 2 points near the origin coordinates, and take the first point of the structure as the origin. From there, we implement sequentially the NERF algorithm for every point in the minimal structure (in parallel for all the minimal structures) until we reach the first point of the next minimal structure (Figure 1 illustrates the process - TODO: Figure with colours decribing the order). 
-This step requires $n * l$ NERF calls where $n$ is the number of points in the minimal repeated structure and $l$ is the number of structures across which the calculation can be parallelized.
+This step requires $$n * l$$ NERF calls where $$n$$ is the number of points in the minimal repeated structure and $$l$$ is the number of structures across which the calculation can be parallelized.
 
 2. Assembling of backbone fragments
 
