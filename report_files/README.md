@@ -26,9 +26,12 @@ After the backbone assembling, we perform the calculation of the ramifications, 
 
 FIGURE 1: Description of the algorithm (coloured balls).
 
-#### Protein Specifics
+#### Implementation details
 
-Since the oxygen atom in the carbonyl group in protein backbones is only linked to the carbon atom, we don't include it in our backbone calculations, but incorporate it as a sidechain addition to the main backbone formed by the N-CA-C atoms of each aminoacid.
+* The calculations for the rotation matrices to join the backbone fragments are decomposed into a rotation from the $N$ to $$N_{+1}$$ and the rotation from the $$N_{0}$$ to the $${N}$$ minimal structure, thus allowing for the parallelization of the rotation matrices in the base position, leaving a cumulative matrix multiplication as the only sequential part of the algorithm that can not be parallelized.
+* The translation operation is implemented as a cummulative sum, accelerating its calculation.
+* Special effort is put in generalizing every possible function for an arbitrary number of cases, so that a unique call to a function can do the required calculations for as many cases as possible, thus achieving a near-perfect usage of the processor native parallel capabilities (CPU-native vector instructions such as SIMD and AVX or GPU massively parallel architecture).
+* Since the oxygen atom in the carbonyl group in protein backbones is only linked to the carbon atom, we don't include it in our backbone calculations, but incorporate it as a sidechain addition to the main backbone formed by the N-CA-C atoms of each aminoacid.
 We leave the calculation of all sidechains, including C-beta to the *ramifications* step referenced above.
 
 ### Experiments
@@ -39,15 +42,7 @@ TABLE 2: Comparison of execution times between previous sota and our implementat
 FIGURE 2: Same info as in table 2 but more points so that a clear curve can be observed
 
 FIGURE 3: Cummulative error (RMSD, not 3 axes) as a function of encoding-decoding phases. 
-
-
-### Implementation details
-
-Special effort is put in generalizing every possible function for an arbitrary number of cases, so that a unique call to a function can do the required calculations for as many cases as possible, thus achieving a near-perfect usage of the processor native parallel capabilities (CPU-native vector instructions such as SIMD and AVX or GPU massively parallel architecture).
-
-* Concatenation of the backbone:
-    * The calculations for the rotation matrices to join the backbone fragments are decomposed into a rotation from the $N$ to $$N_{+1}$$ and the rotation from the $$N_{0}$$ to the $${N}$$ minimal structure, thus allowing for the parallelization of the rotation matrices in the base position, leaving a cumulative matrix multiplication as the only sequential part of the algorithm that can not be parallelized.
-    * The translation operation is implemented as a cummulative sum, accelerating its calculation.
+    
 
 ### Discussion / Design Choices / Future Work / Comments
 
