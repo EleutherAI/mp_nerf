@@ -1,3 +1,20 @@
+## Introduction
+
+Molecular modelling often uses two distinct sets of coordinates in order to represent polymers like proteins or nucleic acids: internal coordinates (bond lengths, bond angles and dihedrals) and cartesian coordinates (x,y,z). These 2 coordinates systems allow for a complete representation of the molecule, and have both their strengths and weakneses: cartesian coordinates are easier to work with when dealing with tasks that treat the polymer as a rigid system (mainly rotations, translations or visualizations), whereas internal coordinates are preferred when working with forces and interactions between the atoms which form the polymer.
+
+The translation between these systems, however, can become a bottleneck in many applications. While the conversion from cartesian to internal coordinates (often referred to as *forward translation* in the literature) can be straightforwardly parallelized across all polymer points in modern hardware (since the internal coordinates can be calculated independently for each point), it is not the case in the reverse problem (often referred to as *reverse translation*). The translation from internal coordinates to cartesian ones needs to be carried out sequentially since the position of each atom depends on the position of the previous one, in addition to the bond length, bond angle and dihedral angle.
+
+This dependency across the polymer length imposes a time constraint to the *reverse translation* and, although the calculation can be parallelized across many polymers of similar length, the bottleneck is significant for applications that make intensive use of the forward and reverse translations. Examples of such applications include the training of machine learning models, protein structure refinement in the processing of the data obtained by NMR [ref 1 of sota paper], analysis of protein structure changes and molelucar dynamics simulations, etc.
+
+The standard algorithm used for the *reverse translation* recieves the name of NERF (Natural Extension of Reference Frame). In recent years, with the development of more and better computational tools, some effort has been devoted into alleviating the bottleneck that the reverse translation presents. These works have focused on the usage of high-performance, optimized code, the division of the polymer into different fragments (which are folded independently and later ensembled) [pnerf paper alquraishi] and tree ensembling algorithms [sota paper] among others. 
+
+However, this approaches are often implemented specifically for Graphical Processing Units (GPU) to take advantage of its massively parallel architecture, thus limiting the potential usage due to the expensive and specialized hardware needed. tIn addition to that he translation from internal coordinates to cartesian ones continues to be a bottleneck in many pipelines that use it.
+
+This work introduces a massively-parallel NERF algorithm, which reorders the code to explore parallelization and an optimized usage of instructions when possible. The algorithm presented combines features from previous work, exploits some of its ideas, and builds on top of them to provide an acceleration about 300x-1200x, depending on the length of the polymer being translated. 
+
+The main contribution of this work is a massively-parallel Natural extension of Reference Frame (mp-NeRF) algorithm, which acieves speedups of 2-3 orders of magnitude with respect to the previous state of the art. This algorithm allows for an increased efficiency of pipelines which make heavy use of such conversions, like the training of machine learning models to predict polymer structures or different features. 
+
+
 ## Methods
 
 To render nicely go to: [dillinger.io](https://dillinger.io/)
