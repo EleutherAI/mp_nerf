@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from einops import repeat
 # mine
-from data_handler import * 
+from data_handler_nerf import * 
 
 
 def get_axis_matrix(a, b, c, norm=True):
@@ -68,7 +68,7 @@ def mp_nerf_torch(a, b, c, l, theta, chi):
 
 
 def proto_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
-               device=torch.device("cpu"), seq_rot = True):
+               device=torch.device("cpu")):
     """ Calcs coords of a protein given it's
         sequence and internal angles.
         Inputs: 

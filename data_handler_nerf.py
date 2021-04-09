@@ -604,7 +604,14 @@ def scn_cloud_mask(seq, coords=None):
         Outputs: (length, 14) boolean mask 
     """ 
     if coords is not None:
-        return  ( rearrange(coords, 'b (l c) d -> b l c d', c=14) != 0 ).sum(dim=-1) == 0
+        start = (( rearrange(coords, 'b (l c) d -> b l c d', c=14) != 0 ).sum(dim=-1) != 0).float()
+        # if a point is 0, the following are 0s as well
+        for b in range(start.shape[0]):
+            for pos in range(start.shape[1]):
+                for chain in range(start.shape[2]):
+                    if start[b, pos, chain].item() == 0.:
+                        start[b, pos, chain:] *= 0.
+        return start
     return torch.tensor([SUPREME_INFO[aa]['cloud_mask'] for aa in seq])
 
 
@@ -667,7 +674,7 @@ def scn_index_mask(seq):
     return rearrange(idxs, 'l s d -> d l s')
 
 
-def build_scaffolds_from_scn_angles(seq, angles, device="auto"):
+def build_scaffolds_from_scn_angles(seq, angles, coords=None, device="auto"):
     """ Builds scaffolds for fast access to data
         Inputs: 
         * seq: string of aas (1 letter code)

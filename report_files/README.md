@@ -75,9 +75,11 @@ However, these features could be adapted for a specific case in which a particul
 
 ## Conclusion
 
-* We have proposed a new parallel scheme for the implementation of the Natural Extension of Reference Frame when applied to polymers and showcased the improvement over previous works when applied to proteins. 
+In this work have proposed a new massively parallel scheme for the implementation of the Natural Extension of Reference Frame when applied to polymers and showcased the improvement over previous works when applied to proteins.
 
-* We hope this accelerated implementation can reduce the times for computational simulations, accelerate ML models' training and open the window to new advances in polymer structural science.
+The design principles put in practice allow for a frictionless adaptability and usage accross the community for different kinds of polymers such as proteins, nucleic acids, glycosaminoglycans or synthetic materials.
+
+We hope this accelerated implementation can reduce the times for computational simulations, accelerate the training of machine learning models, and open the window to new advances in polymer structural science.
 
 
 
