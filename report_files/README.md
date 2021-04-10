@@ -51,14 +51,19 @@ FIGURE 1: Description of the algorithm (coloured balls).
 * Since the oxygen atom in the carbonyl group in protein backbones is only linked to the carbon atom, we don't include it in our backbone calculations, but incorporate it as a sidechain addition to the main backbone formed by the N-CA-C atoms of each aminoacid.
 We leave the calculation of all sidechains, including C-beta to the *ramifications* step referenced above.
 
+Experiments were conducted on a MacBook Pro with Intel i5, 4nucleus at 2.5Ghz (laptop) and a DXG-1 with .... specs.
+
 ### Experiments
 We perform 2 experiments in order to benchmark the speed of our algorithm against the previous SOTA and to check the cummulative error that comes with accumulated transformations from internal to cartesian and the reverse mapping (this is of special importantce in algorithms that may use internal coordinates to work with, but that need the conversion functions before and after since the molecular simulation or base representation is in cartesian coordinates)
 
 TABLE 2: Comparison of execution times between previous sota and our implementation
+Here we provide time comparisons of our algorithm (both cpu-laptop, cpu-high end and GPU-high end) with previous state of the art algorithms. Our algorithm achieves 1000x improvements over the rpevious state of the art, while being able to run on CPUs (which makes it broadly applicable and able to exploit parallelism in CPU cluster setups).
+
 
 FIGURE 2: Same info as in table 2 but more points so that a clear curve can be observed
 
 FIGURE 3: Cummulative error (RMSD, not 3 axes) as a function of encoding-decoding phases. 
+We can see instability on the error at the beginning (same in the 3-axis setup) likely caused by the numerical stability at initial conditions (floating point precision issues). After the loss stabilizes, we can see a very small increase with the increase in the number of back and forth conversions. 
     
 
 ### Discussion / Design Choices / Future Work / Comments
@@ -67,6 +72,7 @@ FIGURE 3: Cummulative error (RMSD, not 3 axes) as a function of encoding-decodin
 
     * Programming language (Python vs Compiled): the current implementation is written in Python, a high-level language  widely known among the scientific community, with many scientific software packages implemented in it. Since Python is an interpreted language, and thus slow, we estimate that the current implementation could be accelerated by 2x if a switch to a compiled language is done (ex. C++, Rust, ...). However, this would inevitably lead to a reduction in adoption (since those languages are not as used by the community), increased cost of code maintainability and a reduction on the possible extensions, adaptations, reusability and readability of the current implementation.
     * Differentiability (PyTorch vs NumPy): our implementation is differentiable, thus allowing to train Machine Learning / Deep Learning models with it (ex. RGN-Networks https://github.com/aqlaboratory/rgn), which make heavy use of the conversion from internal representation to cartesian coordinates and have been the primary driver of the algorithmic improvements in the recent years. However, the differentiability of the code makes it inevitably slower because the data structures need to accumulate important information for the gradient calculations, and also because the maintainance of this property prevents us from using more efficient libraries like NumPy, that allow compilation of the code to C (Cython, Numba) to achieve faster runtimes.
+    * Precision: we perform all our calculations in standard floating point precision (float32) as it is the standard for many applications that perform the internal-to-cartesian conversion such as Machine Learning pipelines. This can result in errors up to 2 orders of magnitude higher than the previous state of the art (error in the range of 1e-2 A while previous sota was in the 1e-4 order).
 
 
 However, these features could be adapted for a specific case in which a particular set of properties might be preferred over another (ex. single-thread speed over differentiability, parallelization over single-thread speed, ...). We leave the possible further optimizations or adaptations to very specific scenarios to the community.
