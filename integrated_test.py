@@ -9,7 +9,7 @@ import sys
 import time
 import timeit
 import logging
-sys.path.append("../../geometric-vector-perceptron/examples")
+sys.path.append("../geometric-vector-perceptron/examples")
 
 # science
 import numpy as np 
@@ -40,15 +40,18 @@ sep = "\n\n=======\n\n"
 if __name__ == "__main__":
 
     logger.info("Loading data"+"\n")
-    dataloaders_ = sidechainnet.load(casp_version=7, with_pytorch="dataloaders")
-    logger.info("Data has been loaded"+"\n"+sep)
-
     lengths = [100, 200, 300, 400, 500, 600, 700, 800, 900]
-    stored  = [ geom_utils.get_prot(dataloader_=dataloaders_,
-                                  vocab_=VOCAB, 
-                                  min_len=desired_len+10,
-                                  max_len=desired_len+50 + int(desired_len>500)*(desired_len-500), 
-                                  verbose=1) for desired_len in lengths ]
+    try: 
+        dataloaders_ = sidechainnet.load(casp_version=7, with_pytorch="dataloaders")
+        logger.info("Data has been loaded"+"\n"+sep)
+        stored  = [ geom_utils.get_prot(dataloader_=dataloaders_,
+                                        vocab_=VOCAB, 
+                                        min_len=desired_len+10,
+                                        max_len=desired_len+50 + int(desired_len>500)*(desired_len-500), 
+                                        verbose=1) for desired_len in lengths ]
+    except: 
+    	stored = joblib.load(BASE_FOLDER[:-1]+"_manual/analyzed_prots.joblib")
+    	logger.info("Data has been loaded"+"\n"+sep)
 
     logger.info("Assessing lengths of: "+str([len(x[0]) for x in stored])+"\n")
 
