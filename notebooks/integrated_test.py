@@ -9,7 +9,7 @@ import sys
 import time
 import timeit
 import logging
-sys.path.append("../geometric-vector-perceptron/examples")
+sys.path.append("../../geometric-vector-perceptron/examples")
 
 # science
 import numpy as np 
@@ -42,6 +42,7 @@ if __name__ == "__main__":
     logger.info("Loading data"+"\n")
     lengths = [100, 200, 300, 400, 500, 600, 700, 800, 900]
     try: 
+        "a"+9
         dataloaders_ = sidechainnet.load(casp_version=7, with_pytorch="dataloaders")
         logger.info("Data has been loaded"+"\n"+sep)
         stored  = [ geom_utils.get_prot(dataloader_=dataloaders_,

@@ -1,12 +1,12 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
+*/__pycache__/
 *.py[cod]
 *$py.class
 
 
 # to ignore
-.DS_Store
-sidechainnet_data/*
+*.DS_Store
+*sidechainnet_data/*
 *.pkl
 
 # C extensions
