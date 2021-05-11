@@ -431,7 +431,7 @@ BB_BUILD_INFO = {
     }  # A simple approximation, not meant to be exact.
 }
 
-
+# without cycling around pi
 MP_SC_INFO = {
     'A': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 1.7651962}}, 
     'R': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 1.7202178}, 'CG': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -0.80549365}, 'CD': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -0.057103734}, 'NE': {'bond_len': 1.463, 'bond_angs': 1.9408059, 'bond_dihedral': -0.067377485}, 'CZ': {'bond_len': 1.34, 'bond_angs': 2.1502457, 'bond_dihedral': -0.030421479}, 'NH1': {'bond_len': 1.34, 'bond_angs': 2.094395, 'bond_dihedral': 0.024268176}, 'NH2': {'bond_len': 1.34, 'bond_angs': 2.094395, 'bond_dihedral': -3.1173246}}, 
@@ -455,3 +455,37 @@ MP_SC_INFO = {
     'V': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 2.0224612}, 'CG1': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': 0.65153766}, 'CG2': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -0.66654116}}, 
     '_': {}
 }
+
+# cycling around pi
+MP2SC_INFO = {
+    'A': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 2.748366}},
+    'R': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 2.6976738}, 'CG': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -2.296891752873556}, 'CD': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -3.0688698927508753}, 'NE': {'bond_lens': 1.463, 'bond_angs': 1.9408059, 'bond_dihedral': -3.1065035502063196}, 'CZ': {'bond_lens': 1.34, 'bond_angs': 2.1502457, 'bond_dihedral': -3.1146112124072474}, 'NH1': {'bond_lens': 1.34, 'bond_angs': 2.094395, 'bond_dihedral': 0.024268176}, 'NH2': {'bond_lens': 1.34, 'bond_angs': 2.094395, 'bond_dihedral': -3.1173246}},
+    'N': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 2.8416245}, 'CG': {'bond_lens': 1.5219998, 'bond_angs': 1.9390607, 'bond_dihedral': -2.35341984430422}, 'OD1': {'bond_lens': 1.229, 'bond_angs': 2.101376, 'bond_dihedral': -0.087414205}, 'ND2': {'bond_lens': 1.3349999, 'bond_angs': 2.0350537, 'bond_dihedral': -3.2290068}},
+    'D': {'CB': {'bond_lens': 1.526, 'bond_angs': 1.9146265, 'bond_dihedral': 2.7741134}, 'CG': {'bond_lens': 1.522, 'bond_angs': 1.9390608, 'bond_dihedral': -2.5010069052325647}, 'OD1': {'bond_lens': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': -0.0678593}, 'OD2': {'bond_lens': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': -3.209452}},
+    'C': {'CB': {'bond_lens': 1.5259998, 'bond_angs': 1.9146262, 'bond_dihedral': 2.553627}, 'SG': {'bond_lens': 1.8099997, 'bond_angs': 1.8954275, 'bond_dihedral': -2.4496057669269007}},
+    'Q': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 2.7262106}, 'CG': {'bond_lens': 1.5260003, 'bond_angs': 1.9111353, 'bond_dihedral': -2.1731813589679163}, 'CD': {'bond_lens': 1.5219998, 'bond_angs': 1.9390606, 'bond_dihedral': -3.0375261942492884}, 'OE1': {'bond_lens': 1.229, 'bond_angs': 2.101376, 'bond_dihedral': 0.002834766}, 'NE2': {'bond_lens': 1.3349998, 'bond_angs': 2.0350537, 'bond_dihedral': -3.138758}},
+    'E': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146267, 'bond_dihedral': 2.7813723}, 'CG': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -2.259677235280172}, 'CD': {'bond_lens': 1.5219998, 'bond_angs': 1.9390606, 'bond_dihedral': -3.0907722155200403}, 'OE1': {'bond_lens': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': 0.003740118}, 'OE2': {'bond_lens': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': -3.1378527}},
+    'G': {},
+    'H': {'CB': {'bond_lens': 1.5259998, 'bond_angs': 1.9146264, 'bond_dihedral': 2.614421}, 'CG': {'bond_lens': 1.5039998, 'bond_angs': 1.9739674, 'bond_dihedral': -2.348853890095846}, 'ND1': {'bond_lens': 1.3850001, 'bond_angs': 2.094395, 'bond_dihedral': -0.08675759}, 'CE1': {'bond_lens': 1.3430002, 'bond_angs': 1.8849558, 'bond_dihedral': 3.1415927}, 'NE2': {'bond_lens': 1.335, 'bond_angs': 1.8849558, 'bond_dihedral': 0.0}, 'CD2': {'bond_lens': 1.3940002, 'bond_angs': 1.8849558, 'bond_dihedral': 0.0}},
+    'I': {'CB': {'bond_lens': 1.526, 'bond_angs': 1.9146265, 'bond_dihedral': 2.5604365}, 'CG1': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -0.859962}, 'CD1': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -3.0667439142810267}, 'CG2': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -3.1225884596454065}},
+    'L': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 2.711971}, 'CG': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -1.9031136671649378}, 'CD1': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': 2.4652872}, 'CD2': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -1.9555614630328577}},
+    'K': {'CB': {'bond_lens': 1.526, 'bond_angs': 1.9146266, 'bond_dihedral': 2.7441595}, 'CG': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -2.2560017744647425}, 'CD': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -3.0881102720843714}, 'CE': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': 3.092959}, 'NZ': {'bond_lens': 1.4710001, 'bond_angs': 1.940806, 'bond_dihedral': 3.0515378}},
+    'M': {'CB': {'bond_lens': 1.526, 'bond_angs': 1.9146264, 'bond_dihedral': 2.7051392}, 'CG': {'bond_lens': 1.526, 'bond_angs': 1.9111354, 'bond_dihedral': -2.1267417112933558}, 'SD': {'bond_lens': 1.8099998, 'bond_angs': 2.001892, 'bond_dihedral': 3.1411812}, 'CE': {'bond_lens': 1.8099998, 'bond_angs': 1.7261307, 'bond_dihedral': -0.048235133}},
+    'F': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 2.545154}, 'CG': {'bond_lens': 1.5100001, 'bond_angs': 1.9896755, 'bond_dihedral': -2.343391720448629}, 'CD1': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.5108389}, 'CE1': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 3.1415927}, 'CZ': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}, 'CE2': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}, 'CD2': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}},
+    'P': {'CB': {'bond_lens': 1.5260001, 'bond_angs': 1.9146266, 'bond_dihedral': 3.0584893}, 'CG': {'bond_lens': 1.5260001, 'bond_angs': 1.9111352, 'bond_dihedral': 0.024303282}, 'CD': {'bond_lens': 1.5260001, 'bond_angs': 1.9111352, 'bond_dihedral': 0.0037610964}},
+    'S': {'CB': {'bond_lens': 1.5260001, 'bond_angs': 1.9146266, 'bond_dihedral': 2.6017702}, 'OG': {'bond_lens': 1.41, 'bond_angs': 1.9111352, 'bond_dihedral': 2.85091}},
+    'T': {'CB': {'bond_lens': 1.5260001, 'bond_angs': 1.9146265, 'bond_dihedral': 2.4884229}, 'OG1': {'bond_lens': 1.4099998, 'bond_angs': 1.9111353, 'bond_dihedral': -0.04425942}, 'CG2': {'bond_lens': 1.5260001, 'bond_angs': 1.9111353, 'bond_dihedral': -2.355398480092184}},
+    'W': {'CB': {'bond_lens': 1.526, 'bond_angs': 1.9146266, 'bond_dihedral': 2.6109421}, 'CG': {'bond_lens': 1.4950002, 'bond_angs': 2.0176008, 'bond_dihedral': -2.529051129017965}, 'CD1': {'bond_lens': 1.3520001, 'bond_angs': 2.1816616, 'bond_dihedral': 0.28870663}, 'NE1': {'bond_lens': 1.3810003, 'bond_angs': 1.8971729, 'bond_dihedral': 3.1415927}, 'CE2': {'bond_lens': 1.3799998, 'bond_angs': 1.9477878, 'bond_dihedral': 0.0}, 'CZ2': {'bond_lens': 1.3999999, 'bond_angs': 2.317797, 'bond_dihedral': 3.1415927}, 'CH2': {'bond_lens': 1.3999999, 'bond_angs': 2.094395, 'bond_dihedral': 3.1415927}, 'CZ3': {'bond_lens': 1.3999999, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}, 'CE3': {'bond_lens': 1.3999999, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}, 'CD2': {'bond_lens': 1.404, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}},
+    'Y': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 2.5424516}, 'CG': {'bond_lens': 1.5100001, 'bond_angs': 1.9896754, 'bond_dihedral': -2.3754170576678675}, 'CD1': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.4462125}, 'CE1': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 3.141593}, 'CZ': {'bond_lens': 1.4090003, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}, 'OH': {'bond_lens': 1.3640002, 'bond_angs': 2.094395, 'bond_dihedral': 3.141593}, 'CE2': {'bond_lens': 1.4090003, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}, 'CD2': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}},
+    'V': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 2.4783485}, 'CG1': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -2.9864359537707728}, 'CG2': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -0.66654116}},
+    '_': {}
+}
+
+
+
+
+
+
+
+
+
