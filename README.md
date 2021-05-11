@@ -1,4 +1,4 @@
-# MP-NeRF: Massively Parallel Natural Extension of Reference Frame for Efficient Internal to Cartesian Conversion
+# MP-NeRF: Massively Parallel Natural Extension of Reference Frame
 
 This is the code for the paper "Massively Parallel Natural Extension of Reference Frame for Efficient Internal to Cartesian Conversion"
 
@@ -23,9 +23,9 @@ length   |  sota  | **us (cpu)** |  Nx   | us (gpu)
 1000     | 18.66s | **18.21ms**  | ~1024 | 29.89ms      
 
 * **Profiler Trace (CPU)**:
-<center><img src="experiments/profiler_capture.png"></center>
-<center><img src="experiments/histogram_errors.png"></center>
-<center><img src="experiments/error_evolution.png"></center>
+<center><img src="notebooks/experiments/profiler_capture.png"></center>
+<center><img src="notebooks/experiments/histogram_errors.png"></center>
+<center><img src="notebooks/experiments/error_evolution.png"></center>
 
 #### Considerations
 
