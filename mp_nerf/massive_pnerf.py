@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from einops import repeat
 # mine
-from data_handler_nerf import * 
+from utils import * 
 
 
 def get_axis_matrix(a, b, c, norm=True):
@@ -65,20 +65,5 @@ def mp_nerf_torch(a, b, c, l, theta, chi):
                      torch.sin(theta) * torch.sin(chi)], dim=-1).unsqueeze(-1)
     # extend base point, set length
     return c + l.unsqueeze(-1) * torch.matmul(rotate, d).squeeze()
-
-
-
-if __name__ == "__main__":
-    tests = {"100_A" : ''.join( ["A"]*100  ), 
-             "500_A" : ''.join( ["A"]*500  ), 
-             "1000_A": ''.join( ["A"]*1000 )
-            }
-    # test
-    for k,v in tests.items():
-        tac = time.time()
-        coords, mask = proto_fold( v, angles=torch.ones(len(v), 12).float() )
-        tic = time.time()
-        print("Time for {0} is {1}".format(k, tic-tac))
-
 
 
