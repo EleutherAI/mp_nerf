@@ -3,8 +3,6 @@ import numpy as np
 # diff ml
 import torch
 from einops import repeat
-# mine
-from utils import * 
 
 
 def get_axis_matrix(a, b, c, norm=True):

@@ -4,9 +4,9 @@ import numpy as np
 import torch
 from einops import repeat
 # module
-from massive_pnerf import *
-from utils import *
-from kb_proteins import *
+from mp_nerf.massive_pnerf import *
+from mp_nerf.utils import *
+from mp_nerf.kb_proteins import *
 
 
 def scn_cloud_mask(seq, coords=None):
@@ -44,7 +44,7 @@ def scn_angle_mask(seq, angles):
         Outputs: (L, 14) maps point to theta and dihedral.
                  first angle is theta, second is dihedral
     """ 
-    device, precise = angles.device, angles.type()
+    device, precise = angles.device, angles.dtype
     angles = angles
     # get masks
     theta_mask   = torch.tensor([SUPREME_INFO[aa]['theta_mask'] for aa in seq], dtype=precise)
@@ -107,7 +107,7 @@ def build_scaffolds_from_scn_angles(seq, angles=None, coords=None, device="auto"
         * bond_mask: (L, 14) gives the length of the bond originating that atom
     """
     # auto infer device and precision
-    precise = angles.type()
+    precise = angles.dtype
     if device == "auto":
         device = angles.device
 
@@ -116,13 +116,13 @@ def build_scaffolds_from_scn_angles(seq, angles=None, coords=None, device="auto"
     else: 
         cloud_mask = scn_cloud_mask(seq)
 
-    cloud_mask = torch.tensor(cloud_mask).bool().to(device)
+    cloud_mask = cloud_mask.bool().to(device)
     
-    point_ref_mask = torch.tensor(scn_index_mask(seq)).long().to(device)
+    point_ref_mask = scn_index_mask(seq).long().to(device)
      
-    angles_mask = torch.tensor(scn_angle_mask(seq, angles)).to(device, precise)
+    angles_mask = scn_angle_mask(seq, angles).to(device, precise)
      
-    bond_mask = torch.tensor(scn_bond_mask(seq)).to(device, precise)
+    bond_mask = scn_bond_mask(seq).to(device, precise)
     # return all in a dict
     return {"cloud_mask":     cloud_mask, 
             "point_ref_mask": point_ref_mask,
@@ -196,7 +196,7 @@ def modify_scaffolds_with_coords(scaffolds, coords):
 
 
 def protein_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
-                 device=torch.device("cpu")):
+                 device=torch.device("cpu"), hybrid=False):
     """ Calcs coords of a protein given it's
         sequence and internal angles.
         Inputs: 
@@ -210,7 +210,7 @@ def protein_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
         Output: (L, 14, 3) and (L, 14) coordinates and cloud_mask
     """
     # automatic type (float, mixed, double) and size detection
-    precise = bond_mask.type()
+    precise = bond_mask.dtype
     length  = cloud_mask.shape[0]
     # create coord wrapper
     coords = torch.zeros(length, 14, 3, device=device, dtype=precise)
@@ -222,26 +222,29 @@ def protein_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
                                                 0.], device=device, dtype=precise) * BB_BUILD_INFO["BONDLENS"]["ca-c"]
     
     # starting positions (in the x,y plane) and normal vector [0,0,1]
-    init_a = repeat(torch.tensor([1., 0., 0.], device=device, precise=precise), 'd -> l d', l=length)
-    init_b = repeat(torch.tensor([1., 1., 0.], device=device, precise=precise), 'd -> l d', l=length)
+    init_a = repeat(torch.tensor([1., 0., 0.], device=device, dtype=precise), 'd -> l d', l=length)
+    init_b = repeat(torch.tensor([1., 1., 0.], device=device, dtype=precise), 'd -> l d', l=length)
     # do N -> CA. don't do 1st since its done already
     thetas, dihedrals = angles_mask[:, :, 1]
     coords[1:, 1] = mp_nerf_torch(init_a,
                                    init_b, 
                                    coords[:, 0], 
-                                   bond_mask[:, 1], thetas, dihedrals)[1:]
+                                   bond_mask[:, 1], 
+                                   thetas, dihedrals)[1:]
     # do CA -> C. don't do 1st since its done already
     thetas, dihedrals = angles_mask[:, :, 2]
     coords[1:, 2] = mp_nerf_torch(init_b,
                                    coords[:, 0],
                                    coords[:, 1],
-                                   bond_mask[:, 2], thetas, dihedrals)[1:]
+                                   bond_mask[:, 2],
+                                   thetas, dihedrals)[1:]
     # do C -> N
     thetas, dihedrals = angles_mask[:, :, 0]
     coords[:, 3] = mp_nerf_torch(coords[:, 0],
                                    coords[:, 1],
                                    coords[:, 2],
-                                   bond_mask[:, 0], thetas, dihedrals)
+                                   bond_mask[:, 0],
+                                   thetas, dihedrals)
 
     #########
     # sequential pass to join fragments
@@ -258,10 +261,10 @@ def protein_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     rotations /= torch.norm(rotations, dim=-1, keepdim=True)
 
     # do rotation concatenation - do for loop in cpu always - faster
-    rotations = rotations.cpu() if coords.is_cuda else rotations
+    rotations = rotations.cpu() if coords.is_cuda and hybrid else rotations
     for i in range(1, length-1):
         rotations[i] = torch.matmul(rotations[i], rotations[i-1])
-    rotations = rotations.to(device) if coords.is_cuda else rotations
+    rotations = rotations.to(device) if coords.is_cuda and hybrid else rotations
     # rotate all
     coords[1:, :4] = torch.matmul(coords[1:, :4], rotations)
     # offset each position by cumulative sum at that position

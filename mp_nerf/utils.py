@@ -1,8 +1,5 @@
 # Author: Eric Alcaide
 
-import warnings
-warnings.filterwarnings("ignore")
-
 import torch
 import numpy as np 
 from einops import repeat, rearrange
@@ -58,17 +55,18 @@ def kabsch_torch(X, Y):
     # calculate convariance matrix (for each prot in the batch)
     C = torch.matmul(X_, Y_.t())
     # Optimal rotation matrix via SVD - warning! W must be transposed
-    if int(torch.__version__.split(".")[1]) >= 7:
-        V, S, W = torch.linalg.svd(C.detach()) 
-    else: 
+    if int(torch.__version__.split(".")[1]) < 8:
         V, S, W = torch.svd(C.detach())
+        W = W.t()
+    else: 
+        V, S, W = torch.linalg.svd(C.detach()) 
     # determinant sign for direction correction
     d = (torch.det(V) * torch.det(W)) < 0.0
     if d:
         S[-1]    = S[-1] * (-1)
         V[:, -1] = V[:, -1] * (-1)
     # Create Rotation matrix U
-    U = torch.matmul(V, W.t())
+    U = torch.matmul(V, W)
     # calculate rotations
     X_ = torch.matmul(X_.t(), U).t()
     # return centered and aligned

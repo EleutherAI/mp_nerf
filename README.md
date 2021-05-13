@@ -13,7 +13,7 @@ Special emphasis is placed on reusability and ease of use within diverse pipelin
 
 ## Results: 
 
-* **Tests**: n an intel i5 at 2.4 ghz and nvidia 1060 gb
+* **Tests**: in an intel i5 @ 2.4 ghz (cpu) and (intel i7-6700k @ 4GHz + Nvidia 1060GTX 6gb) (gpu)
 
 length   |  sota  | **us (cpu)** |  Nx   | us (gpu) 
 ---------|--------|--------------|-------|-----------
