@@ -757,6 +757,7 @@ SUPREME_INFO = {k: {"cloud_mask": make_cloud_mask(k),
                     "bond_mask": make_bond_mask(k),
                     "theta_mask": make_theta_mask(k),
                     "torsion_mask": make_torsion_mask(k),
+                    "torsion_mask_filled": make_torsion_mask(k, fill=True),
                     "idx_mask": make_idx_mask(k),
                     } 
                 for k in "ARNDCQEGHILKMFPSTWYV_"}

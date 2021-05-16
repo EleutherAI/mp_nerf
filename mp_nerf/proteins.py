@@ -45,9 +45,10 @@ def scn_angle_mask(seq, angles=None, device=None):
                  first angle is theta, second is dihedral
     """ 
     precise = angles.dtype if angles is not None else torch.get_default_dtype()
+    torsion_mask_use = "torsion_mask" if angles is not None else "torsion_mask_filled"
     # get masks
     theta_mask   = torch.tensor([SUPREME_INFO[aa]['theta_mask'] for aa in seq], dtype=precise)
-    torsion_mask = torch.tensor([SUPREME_INFO[aa]['torsion_mask'] for aa in seq], dtype=precise)
+    torsion_mask = torch.tensor([SUPREME_INFO[aa][torsion_mask_use] for aa in seq], dtype=precise)
     # O placement - same as in sidechainnet
     theta_mask[:, 3] = BB_BUILD_INFO["BONDANGS"]["ca-c-o"]
     # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L313der.py#L313
