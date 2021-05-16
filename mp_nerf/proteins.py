@@ -37,22 +37,21 @@ def scn_bond_mask(seq):
     return torch.tensor([SUPREME_INFO[aa]['bond_mask'] for aa in seq])
 
 
-def scn_angle_mask(seq, angles=None):
+def scn_angle_mask(seq, angles=None, device=None):
     """ Inputs: 
         * seq: (length). iterable of 1-letter aa codes of a protein
         * angles: (length, 12). [phi, psi, omega, b_angle(n_ca_c), b_angle(ca_c_n), b_angle(c_n_ca), 6_scn_torsions]
         Outputs: (L, 14) maps point to theta and dihedral.
                  first angle is theta, second is dihedral
     """ 
-    device, precise = angles.device, angles.dtype
-    angles = angles
+    precise = angles.dtype if angles is not None else torch.get_default_dtype()
     # get masks
     theta_mask   = torch.tensor([SUPREME_INFO[aa]['theta_mask'] for aa in seq], dtype=precise)
     torsion_mask = torch.tensor([SUPREME_INFO[aa]['torsion_mask'] for aa in seq], dtype=precise)
     # O placement - same as in sidechainnet
     theta_mask[:, 3] = BB_BUILD_INFO["BONDANGS"]["ca-c-o"]
     # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L313der.py#L313
-    torsion_mask[:, 3] = angles[:, 1] - np.pi 
+    torsion_mask[:, 3] = angles[:, 1] - np.pi if angles is not None else -2.406 # from the xtension
     torsion_mask[-1, 3] += np.pi  
 
     # adapt general to specific angles if passed
@@ -80,7 +79,7 @@ def scn_angle_mask(seq, angles=None):
                 if val:
                     torsion_mask[i, j] = torsion_mask[i, j-1] - np.pi # pick values from last one.
 
-    return torch.stack([theta_mask, torsion_mask], dim=0).to(device)
+    return torch.stack([theta_mask, torsion_mask], dim=0)
 
 
 def scn_index_mask(seq):
@@ -112,9 +111,9 @@ def build_scaffolds_from_scn_angles(seq, angles=None, coords=None, device="auto"
         * bond_mask: (L, 14) gives the length of the bond originating that atom
     """
     # auto infer device and precision
-    precise = angles.dtype
+    precise = angles.dtype if angles is not None else torch.get_default_dtype()
     if device == "auto":
-        device = angles.device
+        device = angles.device if angles is not None else device
 
     if coords is not None: 
         cloud_mask = scn_cloud_mask(seq, coords=coords)
@@ -305,9 +304,8 @@ def protein_fold(cloud_mask, point_ref_mask, angles_mask, bond_mask,
 
 
 def sidechain_fold(wrapper, cloud_mask, point_ref_mask, angles_mask, bond_mask,
-                   device=torch.device("cpu"), keep_grad=False, c_beta=False):
-    """ Calcs coords of a protein given it's
-        sequence and internal angles.
+                   device=torch.device("cpu"), c_beta=False):
+    """ Calcs coords of a protein given it's sequence and internal angles.
         Inputs: 
         * wrapper: (L, 14, 3). coords container with backbone ([:, :3]) and optionally
                                c_beta ([:, 4])
@@ -317,6 +315,7 @@ def sidechain_fold(wrapper, cloud_mask, point_ref_mask, angles_mask, bond_mask,
                                      previous 3 points in the coords array
         * angles_mask: (2, 14, L) maps point to theta and dihedral
         * bond_mask: (L, 14) gives the length of the bond originating that atom
+        * c_beta: whether to place cbeta
 
         Output: (L, 14, 3) and (L, 14) coordinates and cloud_mask
     """
@@ -335,20 +334,20 @@ def sidechain_fold(wrapper, cloud_mask, point_ref_mask, angles_mask, bond_mask,
         # to place C-beta, we need the carbons from prev res - not available for the 1st res
         if i == 4:
             # for 1st residue, use position of the second residue's N
-            first_next_n     = coords[1, :1] # 1, 3
+            first_next_n     = wrapper[1, :1] # 1, 3
             # the c requested is from the previous residue - offset boolean mask by one
             # can't be done with slicing bc glycines are inside chain (dont have cb)
-            main_c_prev_idxs = coords[(level_mask.nonzero().view(-1) - 1), idx_a][1:] # (L-1), 3
+            main_c_prev_idxs = wrapper[(level_mask.nonzero().view(-1) - 1), idx_a][1:] # (L-1), 3
             # concat coords
             coords_a = torch.cat([first_next_n, main_c_prev_idxs])
         else:
-            coords_a = coords[level_mask, idx_a]
+            coords_a = wrapper[level_mask, idx_a]
 
-        coords[level_mask, i] = mp_nerf_torch(coords_a, 
-                                              coords[level_mask, idx_b],
-                                              coords[level_mask, idx_c],
-                                              bond_mask[level_mask, i], 
-                                              thetas, dihedrals)
+        wrapper[level_mask, i] = mp_nerf_torch(coords_a, 
+                                               wrapper[level_mask, idx_b],
+                                               wrapper[level_mask, idx_c],
+                                               bond_mask[level_mask, i], 
+                                               thetas, dihedrals)
     
-    return coords, cloud_mask
+    return wrapper, cloud_mask
 
