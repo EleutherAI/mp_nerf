@@ -200,12 +200,11 @@ def modify_scaffolds_with_coords(scaffolds, coords):
 ##################################
 
 
-def protein_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
+def protein_fold(cloud_mask, point_ref_mask, angles_mask, bond_mask,
                  device=torch.device("cpu"), hybrid=False):
     """ Calcs coords of a protein given it's
         sequence and internal angles.
         Inputs: 
-        * seqs: iterable (string, list...) of aas (1 letter corde)
         * cloud_mask: (L, 14) mask of points that should be converted to coords 
         * point_ref_mask: (3, L, 11) maps point (except n-ca-c) to idxs of
                                      previous 3 points in the coords array
@@ -281,7 +280,7 @@ def protein_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     #########
     for i in range(3,14):
         level_mask = cloud_mask[:, i]
-        # thetas, dihedrals = angles_mask[:, level_mask, i]
+        thetas, dihedrals = angles_mask[:, level_mask, i]
         idx_a, idx_b, idx_c = point_ref_mask[:, level_mask, i-3]
 
         # to place C-beta, we need the carbons from prev res - not available for the 1st res
@@ -299,7 +298,57 @@ def protein_fold(seq, cloud_mask, point_ref_mask, angles_mask, bond_mask,
         coords[level_mask, i] = mp_nerf_torch(coords_a, 
                                               coords[level_mask, idx_b],
                                               coords[level_mask, idx_c],
-                                              bond_mask[level_mask, i], *angles_mask[:, level_mask, i])
+                                              bond_mask[level_mask, i], 
+                                              thetas, dihedrals)
+    
+    return coords, cloud_mask
+
+
+def sidechain_fold(wrapper, cloud_mask, point_ref_mask, angles_mask, bond_mask,
+                   device=torch.device("cpu"), keep_grad=False, c_beta=False):
+    """ Calcs coords of a protein given it's
+        sequence and internal angles.
+        Inputs: 
+        * wrapper: (L, 14, 3). coords container with backbone ([:, :3]) and optionally
+                               c_beta ([:, 4])
+        * seqs: iterable (string, list...) of aas (1 letter corde)
+        * cloud_mask: (L, 14) mask of points that should be converted to coords 
+        * point_ref_mask: (3, L, 11) maps point (except n-ca-c) to idxs of
+                                     previous 3 points in the coords array
+        * angles_mask: (2, 14, L) maps point to theta and dihedral
+        * bond_mask: (L, 14) gives the length of the bond originating that atom
+
+        Output: (L, 14, 3) and (L, 14) coordinates and cloud_mask
+    """
+    precise = wrapper.dtype
+
+    # parallel sidechain - do the oxygen, c-beta and side chain
+    for i in range(3,14):
+        # skip cbeta if arg is set
+        if i == 4 and not c_beta:
+            continue
+        # prepare inputs
+        level_mask = cloud_mask[:, i]
+        thetas, dihedrals = angles_mask[:, level_mask, i]
+        idx_a, idx_b, idx_c = point_ref_mask[:, level_mask, i-3]
+
+        # to place C-beta, we need the carbons from prev res - not available for the 1st res
+        if i == 4:
+            # for 1st residue, use position of the second residue's N
+            first_next_n     = coords[1, :1] # 1, 3
+            # the c requested is from the previous residue - offset boolean mask by one
+            # can't be done with slicing bc glycines are inside chain (dont have cb)
+            main_c_prev_idxs = coords[(level_mask.nonzero().view(-1) - 1), idx_a][1:] # (L-1), 3
+            # concat coords
+            coords_a = torch.cat([first_next_n, main_c_prev_idxs])
+        else:
+            coords_a = coords[level_mask, idx_a]
+
+        coords[level_mask, i] = mp_nerf_torch(coords_a, 
+                                              coords[level_mask, idx_b],
+                                              coords[level_mask, idx_c],
+                                              bond_mask[level_mask, i], 
+                                              thetas, dihedrals)
     
     return coords, cloud_mask
 

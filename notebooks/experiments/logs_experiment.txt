@@ -1,0 +1,188 @@
+2021-05-16 13:58:13,152 INFO MainThread root Assessing lengths of: [112, 236, 327, 436, 528, 649, 760, 865, 174]
+
+2021-05-16 13:58:13,152 INFO MainThread root Preparing speed tests: for device 'cpu'
+
+2021-05-16 13:58:13,161 INFO MainThread root Assessing the speed of folding algorithm at length 112
+
+2021-05-16 13:58:18,521 INFO MainThread root 5.360224656 for 1000 calls
+2021-05-16 13:58:18,521 INFO MainThread root Saving the related information at experiments/100_info.joblib
+
+2021-05-16 13:58:18,523 INFO MainThread root 
+
+=======
+
+
+2021-05-16 13:58:18,542 INFO MainThread root Assessing the speed of folding algorithm at length 236
+
+2021-05-16 13:58:25,916 INFO MainThread root 7.374412637000001 for 1000 calls
+2021-05-16 13:58:25,916 INFO MainThread root Saving the related information at experiments/200_info.joblib
+
+2021-05-16 13:58:25,918 INFO MainThread root 
+
+=======
+
+
+2021-05-16 13:58:25,942 INFO MainThread root Assessing the speed of folding algorithm at length 327
+
+2021-05-16 13:58:34,686 INFO MainThread root 8.743509510999997 for 1000 calls
+2021-05-16 13:58:34,686 INFO MainThread root Saving the related information at experiments/300_info.joblib
+
+2021-05-16 13:58:34,687 INFO MainThread root 
+
+=======
+
+
+2021-05-16 13:58:34,719 INFO MainThread root Assessing the speed of folding algorithm at length 436
+
+2021-05-16 13:58:45,574 INFO MainThread root 10.854679765999997 for 1000 calls
+2021-05-16 13:58:45,574 INFO MainThread root Saving the related information at experiments/400_info.joblib
+
+2021-05-16 13:58:45,576 INFO MainThread root 
+
+=======
+
+
+2021-05-16 13:58:45,623 INFO MainThread root Assessing the speed of folding algorithm at length 528
+
+2021-05-16 13:58:57,644 INFO MainThread root 12.020795469999996 for 1000 calls
+2021-05-16 13:58:57,644 INFO MainThread root Saving the related information at experiments/500_info.joblib
+
+2021-05-16 13:58:57,645 INFO MainThread root 
+
+=======
+
+
+2021-05-16 13:58:57,701 INFO MainThread root Assessing the speed of folding algorithm at length 649
+
+2021-05-16 13:59:11,794 INFO MainThread root 14.093472855000002 for 1000 calls
+2021-05-16 13:59:11,795 INFO MainThread root Saving the related information at experiments/600_info.joblib
+
+2021-05-16 13:59:11,797 INFO MainThread root 
+
+=======
+
+
+2021-05-16 13:59:11,868 INFO MainThread root Assessing the speed of folding algorithm at length 760
+
+2021-05-16 13:59:27,883 INFO MainThread root 16.015339880999996 for 1000 calls
+2021-05-16 13:59:27,884 INFO MainThread root Saving the related information at experiments/700_info.joblib
+
+2021-05-16 13:59:27,886 INFO MainThread root 
+
+=======
+
+
+2021-05-16 13:59:27,964 INFO MainThread root Assessing the speed of folding algorithm at length 865
+
+2021-05-16 13:59:45,910 INFO MainThread root 17.945899956999995 for 1000 calls
+2021-05-16 13:59:45,910 INFO MainThread root Saving the related information at experiments/800_info.joblib
+
+2021-05-16 13:59:45,913 INFO MainThread root 
+
+=======
+
+
+2021-05-16 13:59:45,935 INFO MainThread root Assessing the speed of folding algorithm at length 174
+
+2021-05-16 13:59:52,137 INFO MainThread root 6.200919266 for 1000 calls
+2021-05-16 13:59:52,138 INFO MainThread root Saving the related information at experiments/900_info.joblib
+
+2021-05-16 13:59:52,139 INFO MainThread root 
+
+=======
+
+
+2021-05-16 13:59:52,139 INFO MainThread root Preparing speed tests: for device device(type='cpu')
+
+2021-05-16 13:59:52,148 INFO MainThread root Assessing the speed of folding algorithm at length 112
+
+2021-05-16 13:59:57,622 INFO MainThread root 5.4737392709999995 for 1000 calls
+2021-05-16 13:59:57,622 INFO MainThread root Saving the related information at experiments/100_info.joblib
+
+2021-05-16 13:59:57,624 INFO MainThread root 
+
+=======
+
+
+2021-05-16 13:59:57,643 INFO MainThread root Assessing the speed of folding algorithm at length 236
+
+2021-05-16 14:00:05,124 INFO MainThread root 7.480551407999997 for 1000 calls
+2021-05-16 14:00:05,124 INFO MainThread root Saving the related information at experiments/200_info.joblib
+
+2021-05-16 14:00:05,126 INFO MainThread root 
+
+=======
+
+
+2021-05-16 14:00:05,156 INFO MainThread root Assessing the speed of folding algorithm at length 327
+
+2021-05-16 14:00:14,154 INFO MainThread root 8.997866807000008 for 1000 calls
+2021-05-16 14:00:14,155 INFO MainThread root Saving the related information at experiments/300_info.joblib
+
+2021-05-16 14:00:14,156 INFO MainThread root 
+
+=======
+
+
+2021-05-16 14:00:14,190 INFO MainThread root Assessing the speed of folding algorithm at length 436
+
+2021-05-16 14:00:25,319 INFO MainThread root 11.128622767999985 for 1000 calls
+2021-05-16 14:00:25,320 INFO MainThread root Saving the related information at experiments/400_info.joblib
+
+2021-05-16 14:00:25,322 INFO MainThread root 
+
+=======
+
+
+2021-05-16 14:00:25,361 INFO MainThread root Assessing the speed of folding algorithm at length 528
+
+2021-05-16 14:00:37,838 INFO MainThread root 12.476804873999981 for 1000 calls
+2021-05-16 14:00:37,838 INFO MainThread root Saving the related information at experiments/500_info.joblib
+
+2021-05-16 14:00:37,840 INFO MainThread root 
+
+=======
+
+
+2021-05-16 14:00:37,886 INFO MainThread root Assessing the speed of folding algorithm at length 649
+
+2021-05-16 14:00:51,893 INFO MainThread root 14.006714434000003 for 1000 calls
+2021-05-16 14:00:51,893 INFO MainThread root Saving the related information at experiments/600_info.joblib
+
+2021-05-16 14:00:51,895 INFO MainThread root 
+
+=======
+
+
+2021-05-16 14:00:51,947 INFO MainThread root Assessing the speed of folding algorithm at length 760
+
+2021-05-16 14:01:07,231 INFO MainThread root 15.283852180999986 for 1000 calls
+2021-05-16 14:01:07,231 INFO MainThread root Saving the related information at experiments/700_info.joblib
+
+2021-05-16 14:01:07,232 INFO MainThread root 
+
+=======
+
+
+2021-05-16 14:01:07,291 INFO MainThread root Assessing the speed of folding algorithm at length 865
+
+2021-05-16 14:01:24,493 INFO MainThread root 17.202204179999995 for 1000 calls
+2021-05-16 14:01:24,493 INFO MainThread root Saving the related information at experiments/800_info.joblib
+
+2021-05-16 14:01:24,495 INFO MainThread root 
+
+=======
+
+
+2021-05-16 14:01:24,508 INFO MainThread root Assessing the speed of folding algorithm at length 174
+
+2021-05-16 14:01:30,741 INFO MainThread root 6.23271706700001 for 1000 calls
+2021-05-16 14:01:30,741 INFO MainThread root Saving the related information at experiments/900_info.joblib
+
+2021-05-16 14:01:30,743 INFO MainThread root 
+
+=======
+
+
+2021-05-16 14:01:30,743 INFO MainThread root Execution has finished
+
