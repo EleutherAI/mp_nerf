@@ -1,6 +1,11 @@
 import numpy as np
 import torch
 
+from mp_nerf import *
+from mp_nerf.utils import *
+from mp_nerf.kb_proteins import *
+from mp_nerf.proteins import *
+
 def test_nerf_and_dihedral():
     # create points
     a = torch.tensor([1,2,3]).float()
@@ -26,5 +31,5 @@ def test_nerf_and_dihedral():
     # reconstruct
     # doesnt work because the scn angle was not measured correctly
     # so the method corrects that incorrection
-    assert (nerf_torch(a, b, c, l, theta, chi - np.pi) - torch.tensor([1,0,6])).sum().abs() < 0.1
-    assert get_dihedral_torch(a, b, c, d).item() == chi
+    assert (mp_nerf_torch(a, b, c, l, theta, chi - np.pi) - torch.tensor([1,0,6])).sum().abs() < 0.1
+    assert get_dihedral(a, b, c, d).item() == chi

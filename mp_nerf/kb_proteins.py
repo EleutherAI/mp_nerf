@@ -721,12 +721,11 @@ def make_torsion_mask(aa, fill=False):
     """ Gives the dihedral of the bond originating each atom. """
     mask = np.zeros(14)
     # backbone
-    if aa == "_":
-        return aa
+
     # sidechain
     for i, torsion in enumerate(SC_BUILD_INFO[aa]['torsion-vals']):
         if fill: 
-            mask[4+i] = MP2SC_INFO[aa][ SC_BUILD_INFO[aa]["atom-names"] ]["bond_dihedral"]
+            mask[4+i] = MP2SC_INFO[aa][ SC_BUILD_INFO[aa]["atom-names"][i] ]["bond_dihedral"]
         else: 
             # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L372
             # 999 is an anotation -- change later 
