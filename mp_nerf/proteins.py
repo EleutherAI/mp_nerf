@@ -37,7 +37,7 @@ def scn_bond_mask(seq):
     return torch.tensor([SUPREME_INFO[aa]['bond_mask'] for aa in seq])
 
 
-def scn_angle_mask(seq, angles):
+def scn_angle_mask(seq, angles=None):
     """ Inputs: 
         * seq: (length). iterable of 1-letter aa codes of a protein
         * angles: (length, 12). [phi, psi, omega, b_angle(n_ca_c), b_angle(ca_c_n), b_angle(c_n_ca), 6_scn_torsions]
@@ -49,31 +49,36 @@ def scn_angle_mask(seq, angles):
     # get masks
     theta_mask   = torch.tensor([SUPREME_INFO[aa]['theta_mask'] for aa in seq], dtype=precise)
     torsion_mask = torch.tensor([SUPREME_INFO[aa]['torsion_mask'] for aa in seq], dtype=precise)
-    # fill masks with angle values
-    theta_mask[:, 0] = angles[:, 4] # ca_c_n
-    theta_mask[1:, 1] = angles[:-1, 5] # c_n_ca
-    theta_mask[:, 2] = angles[:, 3] # n_ca_c
-    theta_mask[:, 3] = BB_BUILD_INFO["BONDANGS"]["ca-c-o"]
-    # backbone_torsions
-    torsion_mask[:, 0] = angles[:, 1] # n determined by psi of previous
-    torsion_mask[1:, 1] = angles[:-1, 2] # ca determined by omega of previous
-    torsion_mask[:, 2] = angles[:, 0] # c determined by phi
     # O placement - same as in sidechainnet
+    theta_mask[:, 3] = BB_BUILD_INFO["BONDANGS"]["ca-c-o"]
     # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L313der.py#L313
     torsion_mask[:, 3] = angles[:, 1] - np.pi 
-    torsion_mask[-1, 3] += np.pi              
-    # add torsions to sidechains
-    to_fill = torsion_mask != torsion_mask # "p" fill with passed values
-    to_pick = torsion_mask == 999          # "i" infer from previous one
-    for i in range(len(seq)):
-        # check if any is nan -> fill the holes
-        number = to_fill[i].long().sum()
-        torsion_mask[i, to_fill[i]] = angles[i, 6:6+number]
+    torsion_mask[-1, 3] += np.pi  
 
-        # pick previous value for inferred torsions
-        for j, val in enumerate(to_pick[i]):
-            if val:
-                torsion_mask[i, j] = torsion_mask[i, j-1] - np.pi # pick values from last one.
+    # adapt general to specific angles if passed
+    if angles is not None: 
+        # fill masks with angle values
+        theta_mask[:, 0] = angles[:, 4] # ca_c_n
+        theta_mask[1:, 1] = angles[:-1, 5] # c_n_ca
+        theta_mask[:, 2] = angles[:, 3] # n_ca_c
+        # backbone_torsions
+        torsion_mask[:, 0] = angles[:, 1] # n determined by psi of previous
+        torsion_mask[1:, 1] = angles[:-1, 2] # ca determined by omega of previous
+        torsion_mask[:, 2] = angles[:, 0] # c determined by phi
+    
+
+        # add torsions to sidechains
+        to_fill = torsion_mask != torsion_mask # "p" fill with passed values
+        to_pick = torsion_mask == 999          # "i" infer from previous one
+        for i in range(len(seq)):
+            # check if any is nan -> fill the holes
+            number = to_fill[i].long().sum()
+            torsion_mask[i, to_fill[i]] = angles[i, 6:6+number]
+
+            # pick previous value for inferred torsions
+            for j, val in enumerate(to_pick[i]):
+                if val:
+                    torsion_mask[i, j] = torsion_mask[i, j-1] - np.pi # pick values from last one.
 
     return torch.stack([theta_mask, torsion_mask], dim=0).to(device)
 
