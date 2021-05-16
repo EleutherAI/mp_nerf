@@ -46,7 +46,7 @@ def get_prot(dataloader_=None, vocab_=None, min_len=80, max_len=150, verbose=Tru
         Outputs: (cleaned, without padding)
         (seq_str, int_seq, coords, angles, padding_seq, mask, pid)
     """
-    for batch in dataloader_['train']:
+    for b,batch in enumerate(dataloader_['train']):
         # try for breaking from 2 loops at once
         try:
             for i in range(batch.int_seqs.shape[0]):
@@ -72,6 +72,7 @@ def get_prot(dataloader_=None, vocab_=None, min_len=80, max_len=150, verbose=Tru
                     # print("found a seq of length:", len(seq),
                     #        "but oustide the threshold:", min_len, max_len)
                     pass
+
         except StopIteration:
             break
             
@@ -81,18 +82,20 @@ def get_prot(dataloader_=None, vocab_=None, min_len=80, max_len=150, verbose=Tru
 if __name__ == "__main__":
 
     logger.info("Loading data"+"\n")
-    lengths = [100, 200, 300, 400, 500, 600, 700, 800, 900]
+    lengths = [100, 200, 300, 400, 500, 600, 700, 800, 900]# [::-1]
     try: 
         "a"+9
-        dataloaders_ = sidechainnet.load(casp_version=7, with_pytorch="dataloaders")
+        # skip
+        dataloaders_ = sidechainnet.load(casp_version=7, with_pytorch="dataloaders", batch_size=2)
         logger.info("Data has been loaded"+"\n"+sep)
         stored  = [ get_prot(dataloader_=dataloaders_, 
                              vocab_=VOCAB, 
                              min_len=desired_len+5, 
-                             max_len=desired_len+50) for desired_len in lengths ]
+                             max_len=desired_len+60) for desired_len in lengths ]
+        joblib.dump(stored, BASE_FOLDER[:-1]+"_manual/analyzed_prots.joblib")
     except: 
-    	stored = joblib.load(BASE_FOLDER[:-1]+"_manual/analyzed_prots.joblib")
-    	logger.info("Data has been loaded"+"\n"+sep)
+        stored = joblib.load(BASE_FOLDER[:-1]+"_manual/analyzed_prots.joblib")
+        logger.info("Data has been loaded"+"\n"+sep)
 
     logger.info("Assessing lengths of: "+str([len(x[0]) for x in stored])+"\n")
 
@@ -103,7 +106,7 @@ if __name__ == "__main__":
 
         for i,desired_len in enumerate(lengths):
 
-            seq, true_coords, angles, padding_seq, mask, pid = stored[i]
+            seq, int_seq, true_coords, angles, padding_seq, mask, pid = stored[i]
             scaffolds = mp_nerf.proteins.build_scaffolds_from_scn_angles(seq, angles.to(device))
 
             logger.info("Assessing the speed of folding algorithm at length "+str(len(seq))+"\n")

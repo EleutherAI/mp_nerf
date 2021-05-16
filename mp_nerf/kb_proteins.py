@@ -451,7 +451,8 @@ BB_BUILD_INFO = {
     },
       # Equal to 'ca-c-o', for OXT
     "BONDTORSIONS": {
-        'n-ca-c-n': -0.785398163
+        'n-ca-c-n': -0.785398163, 
+        'n-ca-c-o': -2.406
     }  # A simple approximation, not meant to be exact.
 }
 
