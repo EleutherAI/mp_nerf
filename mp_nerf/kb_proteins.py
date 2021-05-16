@@ -721,7 +721,8 @@ def make_torsion_mask(aa, fill=False):
     """ Gives the dihedral of the bond originating each atom. """
     mask = np.zeros(14)
     # backbone
-    #
+    if aa == "_":
+        return aa
     # sidechain
     for i, torsion in enumerate(SC_BUILD_INFO[aa]['torsion-vals']):
         if fill: 
