@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
             logger.info("Assessing the speed of folding algorithm at length "+str(len(seq))+"\n")
 
-            logger.info( str( timeit.timeit('mp_nerf.proteins.protein_fold(**scaffolds, device=device)',
+            logger.info( str( timeit.timeit('mp_nerf.proteins.protein_fold(**scaffolds, device=device, hybrid=True)',
             	                             globals=globals(), number=1000) )+" for 1000 calls" )
 
             logger.info("Saving the related information at {0}{1}_info.joblib\n".format(
