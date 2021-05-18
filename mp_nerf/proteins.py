@@ -44,11 +44,12 @@ def scn_angle_mask(seq, angles=None, device=None):
         Outputs: (L, 14) maps point to theta and dihedral.
                  first angle is theta, second is dihedral
     """ 
+    device = angles.device if angles is not None else torch.device("cpu")
     precise = angles.dtype if angles is not None else torch.get_default_dtype()
     torsion_mask_use = "torsion_mask" if angles is not None else "torsion_mask_filled"
     # get masks
-    theta_mask   = torch.tensor([SUPREME_INFO[aa]['theta_mask'] for aa in seq], dtype=precise)
-    torsion_mask = torch.tensor([SUPREME_INFO[aa][torsion_mask_use] for aa in seq], dtype=precise)
+    theta_mask   = torch.tensor([SUPREME_INFO[aa]['theta_mask'] for aa in seq], dtype=precise).to(device)
+    torsion_mask = torch.tensor([SUPREME_INFO[aa][torsion_mask_use] for aa in seq], dtype=precise).to(device)
     # O placement - same as in sidechainnet
     theta_mask[:, 3] = BB_BUILD_INFO["BONDANGS"]["ca-c-o"]
     # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L313der.py#L313
@@ -289,7 +290,7 @@ def protein_fold(cloud_mask, point_ref_mask, angles_mask, bond_mask,
             first_next_n     = coords[1, :1] # 1, 3
             # the c requested is from the previous residue - offset boolean mask by one
             # can't be done with slicing bc glycines are inside chain (dont have cb)
-            main_c_prev_idxs = coords[(level_mask.nonzero().view(-1) - 1), idx_a][1:] # (L-1), 3
+            main_c_prev_idxs = coords[(torch.nonzero(level_mask).view(-1) - 1), idx_a][1:] # (L-1), 3
             # concat coords
             coords_a = torch.cat([first_next_n, main_c_prev_idxs])
         else:
