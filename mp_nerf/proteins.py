@@ -352,4 +352,3 @@ def sidechain_fold(wrapper, cloud_mask, point_ref_mask, angles_mask, bond_mask,
                                                thetas, dihedrals)
     
     return wrapper, cloud_mask
-
