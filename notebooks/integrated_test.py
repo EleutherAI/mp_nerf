@@ -38,18 +38,32 @@ sep = "\n\n=======\n\n"
 if __name__ == "__main__":
 
     logger.info("Loading data"+"\n")
-    lengths = [100, 200, 300, 400, 500, 600, 700, 800, 900]# [::-1]
+    # adapt desired lengths to previous experiments results
+    # lengths = [100, 200, 300, 400, 500, 600, 700, 800, 900]# [::-1]
+    lengths = [[131, 150],
+               [200, 250],
+               [331, 351],
+               [400, 450],
+               [500, 550],
+               [600, 650],
+               [700, 780],
+               [800, 900],
+               [905, 1070]]# [::-1]
     try: 
-        "a"+9
         # skip
-        dataloaders_ = sidechainnet.load(casp_version=7, with_pytorch="dataloaders", batch_size=2)
         logger.info("Data has been loaded"+"\n"+sep)
-        stored  = [ mp_nerf.utils.get_prot(dataloader_=dataloaders_, 
-                                           vocab_=VOCAB, 
-                                           min_len=desired_len+5, 
-                                           max_len=desired_len+60) for desired_len in lengths ]
+        stored  = [ ]
+        for i,(desired_len, upper_len) in enumerate(lengths[::-1]): 
+            dataloaders_ = sidechainnet.load(casp_version=7, with_pytorch="dataloaders", batch_size=2)
+            stored.append(mp_nerf.utils.get_prot(dataloader_=dataloaders_, 
+                                                 vocab_=VOCAB, 
+                                                 min_len=desired_len, 
+                                                 max_len=upper_len))
+        stored = stored[::-1]
+
         joblib.dump(stored, BASE_FOLDER[:-1]+"_manual/analyzed_prots.joblib")
     except: 
+        "a"+9
         stored = joblib.load(BASE_FOLDER[:-1]+"_manual/analyzed_prots.joblib")
         logger.info("Data has been loaded"+"\n"+sep)
 
