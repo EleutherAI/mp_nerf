@@ -17,10 +17,10 @@ Special emphasis is placed on reusability and ease of use within diverse pipelin
 
 length   |  sota  | **us (cpu)** |  Nx   | us (gpu) | us (hybrid) |
 ---------|--------|--------------|-------|----------|-------------|
-~114     | 2.4s   | **5.64ms**   | ~420  | 22.02ms  | 19.65ms     |
-~300     | 3.5s   | **8.29ms**   | ~422  | 26.46ms  | 23.60ms     |
-~500     | 7.5s   | **11.49ms**  | ~652  | 31.47ms  | 24.96ms     |
-~1000    | 18.66s | **16.80ms**  | ~1112 | 43.09ms  | 29.09ms     |
+~114     | 2.4s   | **5.33ms**   | ~446  | 19.93ms  | 18.41ms     |
+~300     | 3.5s   | **8.66ms**   | ~400  | 25.47ms  | 22.54ms     |
+~500     | 7.5s   | **11.22ms**  | ~651  | 30.79ms  | 24.05ms     |
+~1000    | 18.66s | **18.11ms**  | ~1030 | 44.29ms  | 30.69ms     |
 
 * **Profiler Trace (CPU)**:
 <center><img src="notebooks/experiments_manual/profiler_capture.png"></center>
