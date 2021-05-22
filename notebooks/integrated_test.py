@@ -36,7 +36,7 @@ sep = "\n\n=======\n\n"
 
 # begin tests
 if __name__ == "__main__":
-
+    "a"+9
     logger.info("Loading data"+"\n")
     # adapt desired lengths to previous experiments results
     # lengths = [100, 200, 300, 400, 500, 600, 700, 800, 900]# [::-1]
@@ -63,7 +63,6 @@ if __name__ == "__main__":
 
         joblib.dump(stored, BASE_FOLDER[:-1]+"_manual/analyzed_prots.joblib")
     except: 
-        "a"+9
         stored = joblib.load(BASE_FOLDER[:-1]+"_manual/analyzed_prots.joblib")
         logger.info("Data has been loaded"+"\n"+sep)
 
