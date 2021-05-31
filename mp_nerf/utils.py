@@ -17,11 +17,11 @@ def get_prot(dataloader_=None, vocab_=None, min_len=80, max_len=150, verbose=Tru
         Outputs: (cleaned, without padding)
         (seq_str, int_seq, coords, angles, padding_seq, mask, pid)
     """
-    for b,batch in enumerate(dataloader_['train']):
-        # try for breaking from 2 loops at once
-        try:
+    while True:
+        for b,batch in enumerate(dataloader_['train']):
             for i in range(batch.int_seqs.shape[0]):
-                # strip padding padding
+                # strip padding - matching angles to string means
+                # only accepting prots with no missing residues (angles would be 0)
                 padding_seq = (batch.int_seqs[i] == 20).sum().item()
                 padding_angles = (torch.abs(batch.angs[i]).sum(dim=-1) == 0).long().sum().item()
 
@@ -37,17 +37,20 @@ def get_prot(dataloader_=None, vocab_=None, min_len=80, max_len=150, verbose=Tru
                         mask    = batch.msks[i][:-padding_seq or None]
                         coords  = batch.crds[i][:-padding_seq*14 or None]
 
-                        print("stopping at sequence of length", real_len)
-                        raise StopIteration
+                        if verbose:
+                            print("stopping at sequence of length", real_len)
+                        return seq, int_seq, coords, angles, padding_seq, mask, batch.pids[i]
+                    else:
+                        if verbose:
+                            print("found a seq of length:", batch.int_seqs[i].shape,
+                                  "but oustide the threshold:", min_len, max_len)
                 else:
-                    # print("found a seq of length:", len(seq),
-                    #        "but oustide the threshold:", min_len, max_len)
+                    if verbose:
+                        print("paddings not matching", padding_seq, padding_angles)
                     pass
 
-        except StopIteration:
-            break
-            
-    return seq, int_seq, coords, angles, padding_seq, mask, batch.pids[i]
+    return None
+    
 
 
 ######################

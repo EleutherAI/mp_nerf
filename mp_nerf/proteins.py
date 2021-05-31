@@ -50,7 +50,7 @@ def scn_angle_mask(seq, angles=None, device=None):
     # get masks
     theta_mask   = torch.tensor([SUPREME_INFO[aa]['theta_mask'] for aa in seq], dtype=precise).to(device)
     torsion_mask = torch.tensor([SUPREME_INFO[aa][torsion_mask_use] for aa in seq], dtype=precise).to(device)
-    # O placement - same as in sidechainnet
+    # =O placement - same as in sidechainnet
     theta_mask[:, 3] = BB_BUILD_INFO["BONDANGS"]["ca-c-o"]
     # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L313der.py#L313
     torsion_mask[:, 3] = angles[:, 1] - np.pi if angles is not None else -2.406 # from the xtension
@@ -66,7 +66,7 @@ def scn_angle_mask(seq, angles=None, device=None):
         torsion_mask[:, 0] = angles[:, 1] # n determined by psi of previous
         torsion_mask[1:, 1] = angles[:-1, 2] # ca determined by omega of previous
         torsion_mask[:, 2] = angles[:, 0] # c determined by phi
-    
+
 
         # add torsions to sidechains
         to_fill = torsion_mask != torsion_mask # "p" fill with passed values
@@ -286,13 +286,13 @@ def protein_fold(cloud_mask, point_ref_mask, angles_mask, bond_mask,
 
         # to place C-beta, we need the carbons from prev res - not available for the 1st res
         if i == 4:
-            # for 1st residue, use position of the second residue's N
-            first_next_n     = coords[1, :1] # 1, 3
             # the c requested is from the previous residue - offset boolean mask by one
             # can't be done with slicing bc glycines are inside chain (dont have cb)
-            main_c_prev_idxs = coords[(torch.nonzero(level_mask).view(-1) - 1), idx_a][1:] # (L-1), 3
-            # concat coords
-            coords_a = torch.cat([first_next_n, main_c_prev_idxs])
+            coords_a = coords[(level_mask.nonzero().view(-1) - 1), idx_a] # (L-1), 3
+            # if first residue is not glycine, 
+            # for 1st residue, use position of the second residue's N (1,3)
+            if level_mask[0].item():
+                coords_a[0] = coords[1, 1]
         else:
             coords_a = coords[level_mask, idx_a]
 
@@ -335,13 +335,13 @@ def sidechain_fold(wrapper, cloud_mask, point_ref_mask, angles_mask, bond_mask,
 
         # to place C-beta, we need the carbons from prev res - not available for the 1st res
         if i == 4:
-            # for 1st residue, use position of the second residue's N
-            first_next_n     = wrapper[1, :1] # 1, 3
             # the c requested is from the previous residue - offset boolean mask by one
             # can't be done with slicing bc glycines are inside chain (dont have cb)
-            main_c_prev_idxs = wrapper[(level_mask.nonzero().view(-1) - 1), idx_a][1:] # (L-1), 3
-            # concat coords
-            coords_a = torch.cat([first_next_n, main_c_prev_idxs])
+            coords_a = wrapper[(level_mask.nonzero().view(-1) - 1), idx_a] # (L-1), 3
+            # if first residue is not glycine, 
+            # for 1st residue, use position of the second residue's N (1,3)
+            if level_mask[0].item():
+                coords_a[0] = wrapper[1, 1]
         else:
             coords_a = wrapper[level_mask, idx_a]
 
