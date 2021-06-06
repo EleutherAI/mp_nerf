@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
   name = 'mp-nerf',
   packages = find_packages(),
-  version = '0.1.8',
+  version = '0.1.9',
   license='MIT',
   description = 'MP-NeRF: Massively Parallel Natural Extension of Reference Frame',
   author = 'Eric Alcaide',
