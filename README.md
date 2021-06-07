@@ -1,6 +1,6 @@
 # MP-NeRF: Massively Parallel Natural Extension of Reference Frame
 
-This is the code for the paper "MP-NeRF: A Massively Parallel Method For Accelerating Polymer Structure Reconstruction from Bond Angles"
+This is the code for the paper "MP-NeRF: A Massively Parallel Method for Accelerating Protein Structure Reconstruction from Internal Coordinates"
 
 ## Abstract
 
