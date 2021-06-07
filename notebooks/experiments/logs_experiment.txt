@@ -1,0 +1,70 @@
+2021-06-07 23:13:24,959 INFO MainThread root Loading data
+
+2021-06-07 23:13:38,739 INFO MainThread root Loading data
+
+2021-06-07 23:13:48,499 INFO MainThread root Loading data
+
+2021-06-07 23:13:48,499 INFO MainThread root Preparing speed tests: for device device(type='cpu') and hybrid_opt: False
+
+2021-06-07 23:14:01,528 INFO MainThread root Loading data
+
+2021-06-07 23:14:01,528 INFO MainThread root Preparing speed tests: for device device(type='cpu') and hybrid_opt: False
+
+2021-06-07 23:14:53,890 INFO MainThread root Loading data
+
+2021-06-07 23:14:59,937 INFO MainThread root Loading data
+
+2021-06-07 23:14:59,937 INFO MainThread root Preparing speed tests: for device device(type='cpu') and hybrid_opt: False
+
+2021-06-07 23:14:59,954 DEBUG MainThread .prody 1864 atoms and 1 coordinate set(s) were parsed in 0.02s.
+2021-06-07 23:15:10,979 INFO MainThread root Loading data
+
+2021-06-07 23:15:10,980 INFO MainThread root Preparing speed tests: for device device(type='cpu') and hybrid_opt: False
+
+2021-06-07 23:15:10,995 DEBUG MainThread .prody 1864 atoms and 1 coordinate set(s) were parsed in 0.01s.
+2021-06-07 23:15:32,111 INFO MainThread root Loading data
+
+2021-06-07 23:15:32,112 INFO MainThread root Preparing speed tests: for device device(type='cpu') and hybrid_opt: False
+
+2021-06-07 23:15:32,124 DEBUG MainThread .prody 1864 atoms and 1 coordinate set(s) were parsed in 0.01s.
+2021-06-07 23:15:32,659 INFO MainThread root Assessing the speed of folding algorithm at file experiments_manual/rclab_data/5rsa_ribonuclease.pdb
+
+2021-06-07 23:15:38,006 INFO MainThread root 5.346866726 for 1000 calls
+2021-06-07 23:15:38,006 INFO MainThread root Done
+2021-06-07 23:15:38,006 INFO MainThread root 
+
+=======
+
+
+2021-06-07 23:15:38,084 DEBUG MainThread .prody 10003 atoms and 1 coordinate set(s) were parsed in 0.08s.
+2021-06-07 23:15:41,299 INFO MainThread root Assessing the speed of folding algorithm at file experiments_manual/rclab_data/1000_ala.pdb
+
+2021-06-07 23:15:56,652 INFO MainThread root 15.352682389000002 for 1000 calls
+2021-06-07 23:15:56,652 INFO MainThread root Done
+2021-06-07 23:15:56,652 INFO MainThread root 
+
+=======
+
+
+2021-06-07 23:15:56,690 DEBUG MainThread .prody 5003 atoms and 1 coordinate set(s) were parsed in 0.04s.
+2021-06-07 23:15:58,079 INFO MainThread root Assessing the speed of folding algorithm at file experiments_manual/rclab_data/500_ala.pdb
+
+2021-06-07 23:16:07,192 INFO MainThread root 9.112788776999999 for 1000 calls
+2021-06-07 23:16:07,192 INFO MainThread root Done
+2021-06-07 23:16:07,192 INFO MainThread root 
+
+=======
+
+
+2021-06-07 23:16:07,214 DEBUG MainThread .prody 2568 atoms and 1 coordinate set(s) were parsed in 0.02s.
+2021-06-07 23:16:08,470 INFO MainThread root Assessing the speed of folding algorithm at file experiments_manual/rclab_data/il10_lactate_dh.pdb
+
+2021-06-07 23:16:16,980 INFO MainThread root 8.509638406999997 for 1000 calls
+2021-06-07 23:16:16,980 INFO MainThread root Done
+2021-06-07 23:16:16,980 INFO MainThread root 
+
+=======
+
+
+2021-06-07 23:16:16,980 INFO MainThread root Execution has finished
+
