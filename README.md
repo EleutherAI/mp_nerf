@@ -22,14 +22,6 @@ length   |  sota  | **us (cpu)** |  Nx   | us (gpu) | us (hybrid) |
 ~500     | 7.5s   | **9.1ms**    | ~651  | 29.2ms   | 26.3ms      |
 ~1000    | 18.66s | **15.3ms**   | ~1200 | 43.3ms   | 30.1ms      |
 
-length   |  they  | us (cpu) |  Nx   | us (gpu) 
----------|--------|----------|-------|-----------
-114      | 1.17s  | 5.3ms    | ~448  | 21.1ms   
-300      | 3.5s   | 8.5ms    | ~411  | 26.2ms    
-500      | 7.5s   | 9.1ms    | ~804  | 29.2ms      
-1000     | 18.6s  | 15.3ms   | ~1215 | 43.3ms      
-
-
 * **Profiler Trace (CPU)**:
 <center><img src="notebooks/experiments_manual/profiler_capture.png"></center>
 <center><img src="notebooks/experiments_manual/histogram_errors.png"></center>
