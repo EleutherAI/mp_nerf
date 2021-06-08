@@ -35,42 +35,6 @@ logger = logging.getLogger()
 sep = "\n\n=======\n\n"
 
 
-def get_scn_format(datafile, pdb_code="auto", chain="A", num=1): 
-    """ Gets a PDB ID in sidechainet format
-        Inputs: 
-        * datafile: str. url to RCSB PDB or relative route in the files system.
-        * pdb_code: str. 4-letter PDB code. if auto, will take first 4 
-                    letters of datafile file name. 
-        * chain: str. the chain in the PDB structure to retrieve
-        * num: int. the num in the PDB structure to retrieve. 
-        Outputs: dict with
-        * seq: 1-letter code string
-        * coords (L, 14, 3)
-        * mask (whether coords for residue are known or now)
-    """
-    data = {"seq": None, "coords": None, "mask": None}
-    # get pdb code
-    if pdb_code == "auto": 
-        pdb_code = datafile.split("/")[-1][:4].upper()
-    # download if URL
-    download = False
-    if datafile.startswith("http"):
-        os.system("wget {0}".format(datafile))
-        download = True
-        datafile = datafile.split("/")[-1]
-        
-    # read data
-    chain = pr.parsePDB(datafile, chain=chain, model=num)
-    if download: 
-        os.system("rm {0}".format(datafile))
-    # download seq from PDB API
-    # data["seq_pdb"] = sidechainnet.utils.download.get_seq_from_pdb(pdb_code, chain=1)
-    # get coords
-    keys = ["angles_np", "coords_np", "observed_sequence", "unmodified_sequence", "is_nonstd"]
-    parsed = sidechainnet.utils.measure.get_seq_coords_and_angles(chain)
-    return {k:v for k,v in zip(keys, parsed)}
-
-
 # begin tests
 if __name__ == "__main__":
 
@@ -92,7 +56,12 @@ if __name__ == "__main__":
 
         for i,filename in enumerate(filenames):
 
-            data = get_scn_format(filename, chain="A", num=1)
+            # get data
+            keys = ["angles_np", "coords_np", "observed_sequence"]
+            chain = pr.parsePDB(datafile, chain=chain, model=1)
+            parsed = sidechainnet.utils.measure.get_seq_coords_and_angles(chain)
+            data = {k:v for k,v in zip(keys, parsed)}
+            # get scaffs
             scaffolds = mp_nerf.proteins.build_scaffolds_from_scn_angles(data["observed_sequence"], 
                                                                          torch.from_numpy(data["angles_np"]).to(device))
 
