@@ -6,7 +6,7 @@ This is the code for the paper "MP-NeRF: A Massively Parallel Method for Acceler
 
 The conversion of polymers between internal and cartesian coordinates is a limiting step in many pipelines, such as molecular dynamics simulations and training of machine learning models. This conversion is typically carried out by sequential or parallel applications of the Natural extension of Reference Frame (NeRF)algorithm. 
 
-This work proposes a massively parallel NeRF implementation, which, depending on the polymer length, achieves speedups between 300-1200x over the most recent parallel NeRF implementation by dviding the conversion into three main phases: a parallel composition of the minimal repeated structure, the assembly of backbone subunits and the parallel elongation of sidechains. 
+This work proposes a massively parallel NeRF implementation, which, depending on the polymer length, achieves speedups between 400-1200x over the most recent parallel NeRF implementation by dviding the conversion into three main phases: a parallel composition of the minimal repeated structure, the assembly of backbone subunits and the parallel elongation of sidechains. 
 
 Special emphasis is placed on reusability and ease of use within diverse pipelines. We open source the code (available at https://github.com/EleutherAI/mp_nerf) and provide a corresponding python package.
 
