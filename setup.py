@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
   name = 'mp-nerf',
   packages = find_packages(),
-  version = '0.1.9',
+  version = '0.1.10',
   license='MIT',
   description = 'MP-NeRF: Massively Parallel Natural Extension of Reference Frame',
   author = 'Eric Alcaide',
@@ -17,8 +17,7 @@ setup(
   install_requires=[
     'einops>=0.3',
     'numpy',
-    'torch>=1.6',
-    'sidechainnet'
+    'torch>=1.6', # 'sidechainnet' # for tests
   ],
   setup_requires=[
     'pytest-runner',
