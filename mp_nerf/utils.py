@@ -48,10 +48,8 @@ def get_prot(dataloader_=None, vocab_=None, min_len=80, max_len=150, verbose=Tru
                     if verbose:
                         print("paddings not matching", padding_seq, padding_angles)
                     pass
-
     return None
     
-
 
 ######################
 ## structural utils ##

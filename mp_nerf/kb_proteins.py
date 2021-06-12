@@ -868,6 +868,8 @@ def make_idx_mask(aa):
 ###################
 ##### GETTERS #####
 ###################
+INDEX2AAS = "ACDEFGHIKLMNPQRSTVWY_"
+AAS2INDEX = {aa:i for i,aa in enumerate(INDEX2AAS)}
 SUPREME_INFO = {k: {"cloud_mask": make_cloud_mask(k),
                     "bond_mask": make_bond_mask(k),
                     "theta_mask": make_theta_mask(k),
@@ -875,9 +877,7 @@ SUPREME_INFO = {k: {"cloud_mask": make_cloud_mask(k),
                     "torsion_mask_filled": make_torsion_mask(k, fill=True),
                     "idx_mask": make_idx_mask(k),
                     } 
-                for k in "ARNDCQEGHILKMFPSTWYV_"}
-
-
+                for k in INDEX2AAS}
 
 
 

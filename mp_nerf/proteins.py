@@ -9,22 +9,24 @@ from mp_nerf.utils import *
 from mp_nerf.kb_proteins import *
 
 
-def scn_cloud_mask(seq, coords=None):
+def scn_cloud_mask(seq, coords=None, strict=False):
     """ Gets the boolean mask atom positions (not all aas have same atoms). 
         Inputs: 
         * seqs: (length) iterable of 1-letter aa codes of a protein
         * coords: optional .(batch, lc, 3). sidechainnet coords.
                   returns the true mask (solves potential atoms that might not be provided)
+        * strict: bool. whther to discard the next points after a missing one 
         Outputs: (length, 14) boolean mask 
     """ 
     if coords is not None:
         start = (( rearrange(coords, 'b (l c) d -> b l c d', c=14) != 0 ).sum(dim=-1) != 0).float()
         # if a point is 0, the following are 0s as well
-        for b in range(start.shape[0]):
-            for pos in range(start.shape[1]):
-                for chain in range(start.shape[2]):
-                    if start[b, pos, chain].item() == 0.:
-                        start[b, pos, chain:] *= 0.
+        if strict:
+            for b in range(start.shape[0]):
+                for pos in range(start.shape[1]):
+                    for chain in range(start.shape[2]):
+                        if start[b, pos, chain].item() == 0:
+                            start[b, pos, chain:] *= 0
         return start
     return torch.tensor([SUPREME_INFO[aa]['cloud_mask'] for aa in seq])
 
@@ -311,7 +313,6 @@ def sidechain_fold(wrapper, cloud_mask, point_ref_mask, angles_mask, bond_mask,
         Inputs: 
         * wrapper: (L, 14, 3). coords container with backbone ([:, :3]) and optionally
                                c_beta ([:, 4])
-        * seqs: iterable (string, list...) of aas (1 letter corde)
         * cloud_mask: (L, 14) mask of points that should be converted to coords 
         * point_ref_mask: (3, L, 11) maps point (except n-ca-c) to idxs of
                                      previous 3 points in the coords array
