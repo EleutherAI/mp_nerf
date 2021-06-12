@@ -126,14 +126,15 @@ def noise_internals(seq, angles=None, coords=None, noise_scale=0.5, theta_scale=
 
 
 def combine_noise(true_coords, seq=None, int_seq=None, angles=None,
-                  NOISE_INTERNALS=1e-2, SIDECHAIN_RECONSTRUCT=True):
+                  NOISE_INTERNALS=1e-2, INTERNALS_SCN_SCALE=5., 
+                  SIDECHAIN_RECONSTRUCT=True):
     """ Combines noises. For internal noise, no points can be missing. 
         Inputs: 
         * true_coords: ((B), N, D)
         * int_seq: (N,) torch long tensor of sidechainnet AA tokens 
         * seq: str of length N. FASTA AAs.
         * angles: (N_aa, D_). optional. used for internal noising
-        * NOISE_INTERNAL: float. amount of noise for internal coordinates. 
+        * NOISE_INTERNALS: float. amount of noise for internal coordinates. 
         * SIDECHAIN_RECONSTRUCT: bool. whether to discard the sidechain and
                                  rebuild by sampling from plausible distro.
         Outputs: (B, N, D) coords and (B, N) boolean mask
@@ -164,6 +165,7 @@ def combine_noise(true_coords, seq=None, int_seq=None, angles=None,
         noised_coords, cloud_mask = noise_internals(seq, angles = angles, 
                                                     coords = coords_scn.squeeze(),  
                                                     noise_scale = NOISE_INTERNALS, 
+                                                    theta_scale = INTERNALS_SCN_SCALE,
                                                     verbose = False)
         masked_noised = noised_coords[naive_cloud_mask]
         noised_coords = rearrange(noised_coords, 'l c d -> () (l c) d')
