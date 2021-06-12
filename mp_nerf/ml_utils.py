@@ -185,7 +185,7 @@ def combine_noise(true_coords, seq=None, int_seq=None, angles=None,
 if __name__ == "__main__":
     import joblib
     # imports of data (from mp_nerf.utils.get_prot)
-    prots = joblib.load("../../../segnn-pytorch/examples/custom_tests/infrastructure/prot_list_100_between_150_600.joblib")
+    prots = joblib.load("some_route_to_local_serialized_file_with_prots")
 
     # set params
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
