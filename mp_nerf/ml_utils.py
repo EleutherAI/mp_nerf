@@ -133,6 +133,9 @@ def combine_noise(true_coords, seq=None, int_seq=None, angles=None,
         * int_seq: (N,) torch long tensor of sidechainnet AA tokens 
         * seq: str of length N. FASTA AAs.
         * angles: (N_aa, D_). optional. used for internal noising
+        * NOISE_INTERNAL: float. amount of noise for internal coordinates. 
+        * SIDECHAIN_RECONSTRUCT: bool. whether to discard the sidechain and
+                                 rebuild by sampling from plausible distro.
         Outputs: (B, N, D) coords and (B, N) boolean mask
     """
     # get seqs right
