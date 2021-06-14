@@ -447,12 +447,17 @@ BB_BUILD_INFO = {
     # For placing oxygens
     "BONDANGS": {
         'ca-c-o': 2.0944,  # Approximated to be 2pi / 3; parm10.dat says 2.0350539
-        'ca-c-oh': 2.0944
+        'ca-c-oh': 2.0944, 
+        'ca-c-n': 2.03,
+        'n-ca-c': 1.94,
+        'c-n-ca': 2.08,
     },
       # Equal to 'ca-c-o', for OXT
     "BONDTORSIONS": {
-        'n-ca-c-n': -0.785398163, 
-        'n-ca-c-o': -2.406
+        'n-ca-c-n': -0.785398163, # psi (-44 deg, bimodal distro, pick one)
+        'c-n-ca-c': -1.3962634015954636, # phi (-80 deg, bimodal distro, pick one)
+        'ca-n-c-ca': 3.141592, # omega (180 deg - https://doi.org/10.1016/j.jmb.2005.01.065) 
+        'n-ca-c-o': -2.406 # oxygen
     }  # A simple approximation, not meant to be exact.
 }
 
@@ -825,7 +830,10 @@ def make_theta_mask(aa):
     """ Gives the theta of the bond originating each atom. """
     mask = np.zeros(14)
     # backbone
-    #
+    mask[0] = BB_BUILD_INFO["BONDANGS"]['ca-c-n'] # nitrogen
+    mask[1] = BB_BUILD_INFO["BONDANGS"]['c-n-ca'] # c_alpha
+    mask[2] = BB_BUILD_INFO["BONDANGS"]['n-ca-c'] # carbon
+    mask[3] = BB_BUILD_INFO["BONDANGS"]['ca-c-o'] # oxygen
     # sidechain
     for i,theta in enumerate(SC_BUILD_INFO[aa]['angles-vals']):
         mask[4+i] = theta
@@ -835,7 +843,10 @@ def make_torsion_mask(aa, fill=False):
     """ Gives the dihedral of the bond originating each atom. """
     mask = np.zeros(14)
     # backbone
-
+    mask[0] = BB_BUILD_INFO["BONDTORSIONS"]['n-ca-c-n'] # psi
+    mask[1] = BB_BUILD_INFO["BONDTORSIONS"]['ca-n-c-ca'] # omega
+    mask[2] = BB_BUILD_INFO["BONDTORSIONS"]['c-n-ca-c'] # psi
+    mask[3] = BB_BUILD_INFO["BONDTORSIONS"]['n-ca-c-o'] # oxygen
     # sidechain
     for i, torsion in enumerate(SC_BUILD_INFO[aa]['torsion-vals']):
         if fill: 

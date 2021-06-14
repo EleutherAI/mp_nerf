@@ -52,12 +52,7 @@ def scn_angle_mask(seq, angles=None, device=None):
     # get masks
     theta_mask   = torch.tensor([SUPREME_INFO[aa]['theta_mask'] for aa in seq], dtype=precise).to(device)
     torsion_mask = torch.tensor([SUPREME_INFO[aa][torsion_mask_use] for aa in seq], dtype=precise).to(device)
-    # =O placement - same as in sidechainnet
-    theta_mask[:, 3] = BB_BUILD_INFO["BONDANGS"]["ca-c-o"]
-    # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L313der.py#L313
-    torsion_mask[:, 3] = angles[:, 1] - np.pi if angles is not None else -2.406 # from the xtension
-    torsion_mask[-1, 3] += np.pi  
-
+    
     # adapt general to specific angles if passed
     if angles is not None: 
         # fill masks with angle values
@@ -68,7 +63,8 @@ def scn_angle_mask(seq, angles=None, device=None):
         torsion_mask[:, 0] = angles[:, 1] # n determined by psi of previous
         torsion_mask[1:, 1] = angles[:-1, 2] # ca determined by omega of previous
         torsion_mask[:, 2] = angles[:, 0] # c determined by phi
-
+        # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L313der.py#L313
+        torsion_mask[:, 3] = angles[:, 1] - np.pi
 
         # add torsions to sidechains
         to_fill = torsion_mask != torsion_mask # "p" fill with passed values
@@ -83,6 +79,7 @@ def scn_angle_mask(seq, angles=None, device=None):
                 if val:
                     torsion_mask[i, j] = torsion_mask[i, j-1] - np.pi # pick values from last one.
 
+    torsion_mask[-1, 3] += np.pi 
     return torch.stack([theta_mask, torsion_mask], dim=0)
 
 
