@@ -56,7 +56,7 @@ def rename_symmetric_atoms(pred_coors, true_coors, seq_list, cloud_mask, pred_fe
             amb_idxs  = np.array(pairs["indexs"]).flatten().tolist()
             idxs = torch.tensor([
                 k for k,s in enumerate(seq) if s==aa and \
-                idx in set( torch.nonzero(aux_cloud_mask[i, :, amb_idxs].sum(dim=-1)).tolist() )
+                k in set( torch.nonzero(aux_cloud_mask[i, :, amb_idxs].sum(dim=-1)).tolist()[0] )
             ]).long()
             # check if any AAs matching
             if idxs.shape[0] == 0: 
@@ -115,7 +115,7 @@ def fape_torch(pred_coords, true_coords, max_val=10., l_func=None,
         Outputs: (B, N_atoms) 
     """
     fape_store = []
-    if l_func is not None: 
+    if l_func is None: 
         l_func = lambda x,y,eps=1e-7,sup=max_val: (((x-y)**2).sum(dim=-1) + eps).sqrt() 
     # for chain
     for s in range(pred_coords.shape[0]):  
@@ -144,8 +144,8 @@ def fape_torch(pred_coords, true_coords, max_val=10., l_func=None,
 
         # measure errors - for residue
         for i,rot_mat in enumerate(rot_mats): 
-            fape_store[s] += l1( pred_center[s][mask_center[s]] @ rot_mat, 
-                                 true_center[s][mask_center[s]]
+            fape_store[s] += l_func( pred_center[s][mask_center[s]] @ rot_mat, 
+                                     true_center[s][mask_center[s]]
                                ).clamp(0, max_val)
         fape_store[s] /= rot_mats.shape[0]            
 
