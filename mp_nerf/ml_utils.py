@@ -99,7 +99,7 @@ def torsion_angle_loss(pred_torsions, true_torsions, coeff=2., angle_mask=None):
     return coeff * (1 - maxi)
 
 
-def fape_torch(pred_coords, true_coords, max_val=10., l_func=None
+def fape_torch(pred_coords, true_coords, max_val=10., l_func=None,
                c_alpha=False, seq_list=None, rot_mats_g=None): 
     """ Computes the Frame-Aligned Point Error. Scaled 0 <= FAPE <= 1
         Inputs: 
