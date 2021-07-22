@@ -29,8 +29,6 @@ def test_rename_symmetric_atoms():
     cloud_mask = scn_cloud_mask(seq_list[0]).unsqueeze(0)
     pred_feats = torch.randn(1, 16, 14, 16)
 
-    print(cloud_mask.shape)
-
     renamed = rename_symmetric_atoms(pred_coors, true_coors, seq_list, cloud_mask, pred_feats=pred_feats)
     assert renamed[0].shape == pred_coors.shape and renamed[1].shape == pred_feats.shape, "Shapes don't match"
 
