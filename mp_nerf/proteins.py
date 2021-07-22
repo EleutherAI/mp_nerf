@@ -162,6 +162,26 @@ def build_scaffolds_from_scn_angles(seq, angles=None, coords=None, device="auto"
 #############################
 
 
+def modify_angles_mask_with_torsions(seq, angles_mask, torsions): 
+    """ Modifies a torsion mask to include variable torsions. 
+        Inputs: 
+        * seq: (L,) str. FASTA sequence
+        * angles_mask: (2, L, 14) float tensor of (angles, torsions)
+        * torsions: (L, 4) float tensor (or (L, 5) if it includes torsion for cb)
+        Outputs: (2, L, 14) a new angles mask
+    """
+    c_beta = torsions.shape[-1] == 5 # whether c_beta torsion is passed as well
+    start = 4 if c_beta else 5
+    # get mask of to-fill values
+    torsion_mask = torch.tensor([SUPREME_INFO[aa]["torsion_mask"] for aa in seq]).to(torsions.device) # (L, 14)
+    torsion_mask = torsion_mask != torsion_mask # values that are nan need replace
+    # undesired outside of margins
+    torsion_mask[:, :start] = torsion_mask[:, start+torsions.shape[-1]:] = False
+
+    angles_mask[1, torsion_mask] = torsions[ torsion_mask[:, start:start+torsions.shape[-1]] ]
+    return angles_mask
+
+
 def modify_scaffolds_with_coords(scaffolds, coords):
     """ Gets scaffolds and fills in the right data.
         Inputs: 

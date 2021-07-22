@@ -33,3 +33,13 @@ def test_nerf_and_dihedral():
     # so the method corrects that incorrection
     assert (mp_nerf_torch(a, b, c, l, theta, chi - np.pi) - torch.tensor([1,0,6])).sum().abs() < 0.1
     assert get_dihedral(a, b, c, d).item() == chi
+
+
+def test_modify_angles_mask_with_torsions():
+    # create inputs
+    seq = "AGHHKLHRTVNMSTIL"
+    angles_mask = torch.randn(2, 16, 14)
+    torsions = torch.ones(16, 4)
+    # ensure shape
+    assert modify_angles_mask_with_torsions(seq, angles_mask, torsions).shape == angles_mask.shape, \
+           "Shapes don't match"
