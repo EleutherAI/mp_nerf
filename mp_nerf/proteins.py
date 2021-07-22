@@ -63,13 +63,14 @@ def scn_angle_mask(seq, angles=None, device=None):
         torsion_mask[:, 0] = angles[:, 1] # n determined by psi of previous
         torsion_mask[1:, 1] = angles[:-1, 2] # ca determined by omega of previous
         torsion_mask[:, 2] = angles[:, 0] # c determined by phi
-        # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L313der.py#L313
+        # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L313
         torsion_mask[:, 3] = angles[:, 1] - np.pi
 
-        # add torsions to sidechains
+        # add torsions to sidechains - no need to modify indexes due to torsion modification
+        # since extra rigid modies are in terminal positions in sidechain
         to_fill = torsion_mask != torsion_mask # "p" fill with passed values
         to_pick = torsion_mask == 999          # "i" infer from previous one
-        for i in range(len(seq)):
+        for i,aa in enumerate(seq):
             # check if any is nan -> fill the holes
             number = to_fill[i].long().sum()
             torsion_mask[i, to_fill[i]] = angles[i, 6:6+number]
@@ -78,6 +79,13 @@ def scn_angle_mask(seq, angles=None, device=None):
             for j, val in enumerate(to_pick[i]):
                 if val:
                     torsion_mask[i, j] = torsion_mask[i, j-1] - np.pi # pick values from last one.
+
+            # special rigid bodies anomalies: 
+            if aa == "I": # scn_torsion(CG1) - scn_torsion(CG2) = 2.13 (see KB)
+                torsion_mask[i, 7] += torsion_mask[i, 5]
+            elif aa == "L": 
+                torsion_mask[i, 7] += torsion_mask[i, 6]
+
 
     torsion_mask[-1, 3] += np.pi 
     return torch.stack([theta_mask, torsion_mask], dim=0)
@@ -91,6 +99,20 @@ def scn_index_mask(seq):
     """ 
     idxs = torch.tensor([SUPREME_INFO[aa]['idx_mask'] for aa in seq])
     return rearrange(idxs, 'l s d -> d l s')
+
+
+def scn_rigid_index_mask(seq, c_alpha=None): 
+    """ Inputs: 
+        * seq: (length). iterable of 1-letter aa codes of a protein 
+        * c_alpha: bool. whether to return only the c_alpha rigid group
+        Outputs: (3, Length * Groups). indexes for 1st, 2nd and 3rd point 
+                  to construct frames for each group. 
+    """
+    if c_alpha: 
+        return torch.cat([torch.tensor(SUPREME_INFO[aa]['rigid_idx_mask'])[:1] + 14*i \
+                          for i,aa in enumerate(seq)], dim=0).t()
+    return torch.cat([torch.tensor(SUPREME_INFO[aa]['rigid_idx_mask']) + 14*i \
+                      for i,aa in enumerate(seq)], dim=0).t()
 
 
 def build_scaffolds_from_scn_angles(seq, angles=None, coords=None, device="auto"):

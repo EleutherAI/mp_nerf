@@ -4,6 +4,13 @@ import torch
 import numpy as np 
 from einops import repeat, rearrange
 
+
+# random hacks
+
+# to_pi_minus_pi(4) = -2.28  # to_pi_minus_pi(-4) = 2.28  # rads to pi-(-pi)
+to_pi_minus_pi = lambda x: torch.where( (x//np.pi)%2 == 0, x%np.pi , -(2*np.pi-x%(2*np.pi)) )
+to_zero_two_pi = lambda x: torch.where( x>np.pi, x%np.pi, 2*np.pi + x%np.pi )
+
 # data utils
 def get_prot(dataloader_=None, vocab_=None, min_len=80, max_len=150, verbose=True):
     """ Gets a protein from sidechainnet and returns

@@ -31,6 +31,8 @@ import numpy as np
 ### FROM SIDECHAINNET ###
 #########################
 
+# modified by considering rigid bodies in sidechains (remove extra torsions)
+
 SC_BUILD_INFO = {
     'A': {
         'angles-names': ['N-CA-CB'],
@@ -42,7 +44,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [1.526],
         'torsion-names': ['C-N-CA-CB'],
         'torsion-types': ['C -N -CX-CT'],
-        'torsion-vals': ['p']
+        'torsion-vals': ['p'],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4]],
     },
 
     'R': {
@@ -70,7 +73,8 @@ SC_BUILD_INFO = {
             'C -N -CX-C8', 'N -CX-C8-C8', 'CX-C8-C8-C8', 'C8-C8-C8-N2', 'C8-C8-N2-CA',
             'C8-N2-CA-N2', 'C8-N2-CA-N2'
         ],
-        'torsion-vals': ['p', 'p', 'p', 'p', 'p', 'p', 'i']
+        'torsion-vals': ['p', 'p', 'p', 'p', 'p', 0., 3.141592],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6], [5,6,7], [6,7,8]],
     },
 
     'N': {
@@ -85,7 +89,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [1.526, 1.522, 1.229, 1.335],
         'torsion-names': ['C-N-CA-CB', 'N-CA-CB-CG', 'CA-CB-CG-OD1', 'CA-CB-CG-ND2'],
         'torsion-types': ['C -N -CX-2C', 'N -CX-2C-C ', 'CX-2C-C -O ', 'CX-2C-C -N '],
-        'torsion-vals': ['p', 'p', 'p', 'i']
+        'torsion-vals': ['p', 'p', 'p', 'i'], 
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6]],
     },
 
     'D': {
@@ -100,7 +105,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [1.526, 1.522, 1.25, 1.25],
         'torsion-names': ['C-N-CA-CB', 'N-CA-CB-CG', 'CA-CB-CG-OD1', 'CA-CB-CG-OD2'],
         'torsion-types': ['C -N -CX-2C', 'N -CX-2C-CO', 'CX-2C-CO-O2', 'CX-2C-CO-O2'],
-        'torsion-vals': ['p', 'p', 'p', 'i']
+        'torsion-vals': ['p', 'p', 'p', 'i'],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6]],
     },
 
     'C': {
@@ -113,7 +119,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [1.526, 1.81],
         'torsion-names': ['C-N-CA-CB', 'N-CA-CB-SG'],
         'torsion-types': ['C -N -CX-2C', 'N -CX-2C-SH'],
-        'torsion-vals': ['p', 'p']
+        'torsion-vals': ['p', 'p'],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5]],
     },
 
     'Q': {
@@ -133,7 +140,8 @@ SC_BUILD_INFO = {
         'torsion-types': [
             'C -N -CX-2C', 'N -CX-2C-2C', 'CX-2C-2C-C ', '2C-2C-C -O ', '2C-2C-C -N '
         ],
-        'torsion-vals': ['p', 'p', 'p', 'p', 'i']
+        'torsion-vals': ['p', 'p', 'p', 'p', 'i'],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6], [5,6,7]],
     },
 
     'E': {
@@ -153,7 +161,8 @@ SC_BUILD_INFO = {
         'torsion-types': [
             'C -N -CX-2C', 'N -CX-2C-2C', 'CX-2C-2C-CO', '2C-2C-CO-O2', '2C-2C-CO-O2'
         ],
-        'torsion-vals': ['p', 'p', 'p', 'p', 'i']
+        'torsion-vals': ['p', 'p', 'p', 'p', 'i'],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6], [5,6,7]],
     },
 
     'G': {
@@ -166,7 +175,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [],
         'torsion-names': [],
         'torsion-types': [],
-        'torsion-vals': []
+        'torsion-vals': [],
+        'rigid-frames-idxs': [[0,1,2]],
     },
 
     'H': {
@@ -192,7 +202,8 @@ SC_BUILD_INFO = {
             'C -N -CX-CT', 'N -CX-CT-CC', 'CX-CT-CC-NA', 'CT-CC-NA-CR', 'CC-NA-CR-NB',
             'NA-CR-NB-CV'
         ],
-        'torsion-vals': ['p', 'p', 'p', 3.141592653589793, 0.0, 0.0]
+        'torsion-vals': ['p', 'p', 'p', 3.141592653589793, 0.0, 0.0],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6]],
     },
 
     'I': {
@@ -207,7 +218,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [1.526, 1.526, 1.526, 1.526],
         'torsion-names': ['C-N-CA-CB', 'N-CA-CB-CG1', 'CA-CB-CG1-CD1', 'N-CA-CB-CG2'],
         'torsion-types': ['C -N -CX-3C', 'N -CX-3C-2C', 'CX-3C-2C-CT', 'N -CX-3C-CT'],
-        'torsion-vals': ['p', 'p', 'p', 'p']
+        'torsion-vals': ['p', 'p', 'p', -2.1315], # last one was 'p' in the original - but cg1-cg2 = "2.133"
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,7]],
     },
 
     'L': {
@@ -222,7 +234,9 @@ SC_BUILD_INFO = {
         'bonds-vals': [1.526, 1.526, 1.526, 1.526],
         'torsion-names': ['C-N-CA-CB', 'N-CA-CB-CG', 'CA-CB-CG-CD1', 'CA-CB-CG-CD2'],
         'torsion-types': ['C -N -CX-2C', 'N -CX-2C-3C', 'CX-2C-3C-CT', 'CX-2C-3C-CT'],
-        'torsion-vals': ['p', 'p', 'p', 'p']
+        # extra torsion is in negative bc in mask construction, previous angle is summed. 
+        'torsion-vals': ['p', 'p', 'p', 2.1315], # last one was 'p' in the original - but cd1-cd2 = "-2.130"
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6]],
     },
 
     'K': {
@@ -242,7 +256,8 @@ SC_BUILD_INFO = {
         'torsion-types': [
             'C -N -CX-C8', 'N -CX-C8-C8', 'CX-C8-C8-C8', 'C8-C8-C8-C8', 'C8-C8-C8-N3'
         ],
-        'torsion-vals': ['p', 'p', 'p', 'p', 'p']
+        'torsion-vals': ['p', 'p', 'p', 'p', 'p'],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6], [5,6,7], [6,7,8]],
     },
 
     'M': {
@@ -257,7 +272,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [1.526, 1.526, 1.81, 1.81],
         'torsion-names': ['C-N-CA-CB', 'N-CA-CB-CG', 'CA-CB-CG-SD', 'CB-CG-SD-CE'],
         'torsion-types': ['C -N -CX-2C', 'N -CX-2C-2C', 'CX-2C-2C-S ', '2C-2C-S -CT'],
-        'torsion-vals': ['p', 'p', 'p', 'p']
+        'torsion-vals': ['p', 'p', 'p', 'p'],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6], [5,6,7]],
     },
 
     'F': {
@@ -287,7 +303,8 @@ SC_BUILD_INFO = {
             'C -N -CX-CT', 'N -CX-CT-CA', 'CX-CT-CA-CA', 'CT-CA-CA-CA', 'CA-CA-CA-CA',
             'CA-CA-CA-CA', 'CA-CA-CA-CA'
         ],
-        'torsion-vals': ['p', 'p', 'p', 3.141592653589793, 0.0, 0.0, 0.0]
+        'torsion-vals': ['p', 'p', 'p', 3.141592653589793, 0.0, 0.0, 0.0],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6]],
     },
 
     'P': {
@@ -300,7 +317,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [1.526, 1.526, 1.526],
         'torsion-names': ['C-N-CA-CB', 'N-CA-CB-CG', 'CA-CB-CG-CD'],
         'torsion-types': ['C -N -CX-CT', 'N -CX-CT-CT', 'CX-CT-CT-CT'],
-        'torsion-vals': ['p', 'p', 'p']
+        'torsion-vals': ['p', 'p', 'p'],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6]],
     },
 
     'S': {
@@ -313,7 +331,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [1.526, 1.41],
         'torsion-names': ['C-N-CA-CB', 'N-CA-CB-OG'],
         'torsion-types': ['C -N -CX-2C', 'N -CX-2C-OH'],
-        'torsion-vals': ['p', 'p']
+        'torsion-vals': ['p', 'p'],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5]],
     },
 
     'T': {
@@ -326,7 +345,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [1.526, 1.41, 1.526],
         'torsion-names': ['C-N-CA-CB', 'N-CA-CB-OG1', 'N-CA-CB-CG2'],
         'torsion-types': ['C -N -CX-3C', 'N -CX-3C-OH', 'N -CX-3C-CT'],
-        'torsion-vals': ['p', 'p', 'p']
+        'torsion-vals': ['p', 'p', 'p'],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5]],
     },
 
     'W': {
@@ -367,7 +387,8 @@ SC_BUILD_INFO = {
         'torsion-vals': [
             'p', 'p', 'p', 3.141592653589793, 0.0, 3.141592653589793, 3.141592653589793,
             0.0, 0.0, 0.0
-        ]
+        ],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6]]
     },
 
     'Y': {
@@ -402,7 +423,8 @@ SC_BUILD_INFO = {
         ],
         'torsion-vals': [
             'p', 'p', 'p', 3.141592653589793, 0.0, 3.141592653589793, 0.0, 0.0
-        ]
+        ],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5], [4,5,6]],
     },
 
     'V': {
@@ -415,7 +437,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [1.526, 1.526, 1.526],
         'torsion-names': ['C-N-CA-CB', 'N-CA-CB-CG1', 'N-CA-CB-CG2'],
         'torsion-types': ['C -N -CX-3C', 'N -CX-3C-CT', 'N -CX-3C-CT'],
-        'torsion-vals': ['p', 'p', 'p']
+        'torsion-vals': ['p', 'p', 'p'],
+        'rigid-frames-idxs': [[0,1,2], [0,1,4], [1,4,5]]
     },
 
     '_': {
@@ -428,7 +451,8 @@ SC_BUILD_INFO = {
         'bonds-vals': [],
         'torsion-names': [],
         'torsion-types': [],
-        'torsion-vals': []
+        'torsion-vals': [],
+        'rigid-frames-idxs': [[]],
     }
 }
 
@@ -461,6 +485,110 @@ BB_BUILD_INFO = {
     }  # A simple approximation, not meant to be exact.
 }
 
+
+# numbers follow the same order as sidechainnet atoms
+SCN_CONNECT = { 
+    'A': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4]] 
+         },
+    'R': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [6,7], [7,8], [8,9], [8,10]] 
+         },
+    'N': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [5,7]] 
+         },
+    'D': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [5,7]] 
+         },
+    'C': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5]] 
+        },
+    'Q': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [6,7], [6,8]] 
+        },
+    'E': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [6,7], [6,8]]
+        },
+    'G': {
+        'bonds': [[0,1], [1,2], [2,3]] 
+        },
+    'H': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [6,7], [7,8], [8,9], [5,9]] 
+        },
+    'I': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [4,7]] 
+         },
+    'L': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [5,7]] 
+         },
+    'K': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [6,7], [7,8]] 
+         },
+    'M': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [6,7]] 
+         },
+    'F': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [6,7], [7,8], [8,9], [9,10], [5,10]] 
+         },
+    'P': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [0,6]] 
+         },
+    'S': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5]] 
+         },
+    'T': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [4,6]] 
+         },
+    'W': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [6,7], [7,8], [8,9], [9,10], [10,11], [11,12],
+                  [12, 13], [5,13], [8,13]] 
+         },
+    'Y': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [5,6],
+                  [6,7], [7,8], [8,9], [8,10], [10,11], [5,11]] 
+         },
+    'V': {
+        'bonds': [[0,1], [1,2], [2,3], [1,4], [4,5], [4,6]] 
+         },
+    '_': {
+        'bonds': []
+        }
+    }
+
+# from: https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-021-03819-2/MediaObjects/41586_2021_3819_MOESM1_ESM.pdf
+# added R's terminal Ns due to a small percentage of misalignments' (10%)
+AMBIGUOUS = {
+    "D": {"names": [["OD1", "OD2"]], 
+          "indexs": [[6, 7]], 
+          }, 
+    "E": {"names": [["OE1", "OE2"]],
+          "indexs": [[7, 8]], 
+          }, 
+    "F": {"names": [["CD1", "CD2"], ["CE1", "CE2"]], 
+          "indexs": [[6, 10], [7, 9]],
+          },
+    "Y": {"names": [["CD1", "CD2"], ["CE1", "CE2"]], 
+          "indexs": [[6,10], [7,9]],
+          },
+    "R": {"names": [["NH1", "NH2"]], 
+          "indexs": [[9, 10]]
+          },
+}
+
+
 # AA subst mat
 BLOSUM = {
     "A" : [4.0, -1.0, -2.0, -2.0, 0.0, -1.0, -1.0, 0.0, -2.0, -1.0, -1.0, -1.0, -1.0, -2.0, -1.0, 1.0, 0.0, -3.0, -2.0, 0.0, 0.0],
@@ -486,230 +614,6 @@ BLOSUM = {
     "_" : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
 }
 
-# without cycling around pi
-MP_SC_INFO = {
-    'A': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 1.7651962}
-    },
-    'R': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 1.7202178},
-     'CG': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -0.80549365},
-     'CD': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -0.057103734},
-     'NE': {'bond_len': 1.463, 'bond_angs': 1.9408059, 'bond_dihedral': -0.067377485},
-     'CZ': {'bond_len': 1.34, 'bond_angs': 2.1502457, 'bond_dihedral': -0.030421479},
-     'NH1': {'bond_len': 1.34, 'bond_angs': 2.094395, 'bond_dihedral': 0.024268176},
-     'NH2': {'bond_len': 1.34, 'bond_angs': 2.094395, 'bond_dihedral': -3.1173246}
-    },
-    'N': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 1.6064286},
-     'CG': {'bond_len': 1.5219998, 'bond_angs': 1.9390607, 'bond_dihedral': -0.9772252},
-     'OD1': {'bond_len': 1.229, 'bond_angs': 2.101376, 'bond_dihedral': -0.087414205},
-     'ND2': {'bond_len': 1.3349999, 'bond_angs': 2.0350537, 'bond_dihedral': -3.2290068}
-    },
-    'D': {'CB': {'bond_len': 1.526, 'bond_angs': 1.9146265, 'bond_dihedral': 1.7485901},
-     'CG': {'bond_len': 1.522, 'bond_angs': 1.9390608, 'bond_dihedral': -0.9341481},
-     'OD1': {'bond_len': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': -0.0678593},
-     'OD2': {'bond_len': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': -3.209452}
-    },
-    'C': {'CB': {'bond_len': 1.5259998, 'bond_angs': 1.9146262, 'bond_dihedral': 1.7867815},
-     'SG': {'bond_len': 1.8099997, 'bond_angs': 1.8954275, 'bond_dihedral': -0.56285137}
-    },
-    'Q': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 1.8220874},
-     'CG': {'bond_len': 1.5260003, 'bond_angs': 1.9111353, 'bond_dihedral': -0.86883706},
-     'CD': {'bond_len': 1.5219998, 'bond_angs': 1.9390606, 'bond_dihedral': 0.056939006},
-     'OE1': {'bond_len': 1.229, 'bond_angs': 2.101376, 'bond_dihedral': 0.002834766},
-     'NE2': {'bond_len': 1.3349998, 'bond_angs': 2.0350537, 'bond_dihedral': -3.138758}
-    },
-    'E': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146267, 'bond_dihedral': 1.7476277},
-     'CG': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -0.8527138},
-     'CD': {'bond_len': 1.5219998, 'bond_angs': 1.9390606, 'bond_dihedral': 0.03763389},
-     'OE1': {'bond_len': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': 0.003740118},
-     'OE2': {'bond_len': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': -3.1378527}
-    },
-    'G': {},
-    'H': {'CB': {'bond_len': 1.5259998, 'bond_angs': 1.9146264, 'bond_dihedral': 1.7390871},
-     'CG': {'bond_len': 1.5039998, 'bond_angs': 1.9739674, 'bond_dihedral': -0.72005355},
-     'ND1': {'bond_len': 1.3850001, 'bond_angs': 2.094395, 'bond_dihedral': -0.08675759},
-     'CE1': {'bond_len': 1.3430002, 'bond_angs': 1.8849558, 'bond_dihedral': 3.1415927},
-     'NE2': {'bond_len': 1.335, 'bond_angs': 1.8849558, 'bond_dihedral': 0.0},
-     'CD2': {'bond_len': 1.3940002, 'bond_angs': 1.8849558, 'bond_dihedral': 0.0}
-    },
-    'I': {'CB': {'bond_len': 1.526, 'bond_angs': 1.9146265, 'bond_dihedral': 2.0270472},
-     'CG1': {'bond_len': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -0.859962},
-     'CD1': {'bond_len': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': 1.3780102},
-     'CG2': {'bond_len': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': 0.98380435}
-    },
-    'L': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 1.9709557},
-     'CG': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -0.8970003},
-     'CD1': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': 0.9634645},
-     'CD2': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -0.87477654}
-    },
-    'K': {'CB': {'bond_len': 1.526, 'bond_angs': 1.9146266, 'bond_dihedral': 1.7504896},
-     'CG': {'bond_len': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -0.85716003},
-     'CD': {'bond_len': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -0.046302408},
-     'CE': {'bond_len': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -0.006863439},
-     'NZ': {'bond_len': 1.4710001, 'bond_angs': 1.940806, 'bond_dihedral': 0.04964344}
-    },
-    'M': {'CB': {'bond_len': 1.526, 'bond_angs': 1.9146264, 'bond_dihedral': 1.8164743},
-     'CG': {'bond_len': 1.526, 'bond_angs': 1.9111354, 'bond_dihedral': -0.8616869},
-     'SD': {'bond_len': 1.8099998, 'bond_angs': 2.001892, 'bond_dihedral': -0.04069615},
-     'CE': {'bond_len': 1.8099998, 'bond_angs': 1.7261307, 'bond_dihedral': -0.048235133}
-     },
-    'F': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 1.7901483},
-     'CG': {'bond_len': 1.5100001, 'bond_angs': 1.9896755, 'bond_dihedral': -0.5620897},
-     'CD1': {'bond_len': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.5108389},
-     'CE1': {'bond_len': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 3.1415927},
-     'CZ': {'bond_len': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'CE2': {'bond_len': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'CD2': {'bond_len': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}
-     },
-    'P': {'CB': {'bond_len': 1.5260001, 'bond_angs': 1.9146266, 'bond_dihedral': 0.826416},
-     'CG': {'bond_len': 1.5260001, 'bond_angs': 1.9111352, 'bond_dihedral': 0.024303282},
-     'CD': {'bond_len': 1.5260001, 'bond_angs': 1.9111352, 'bond_dihedral': 0.0037610964}
-     },
-    'S': {'CB': {'bond_len': 1.5260001, 'bond_angs': 1.9146266, 'bond_dihedral': 1.7615237},
-     'OG': {'bond_len': 1.41, 'bond_angs': 1.9111352, 'bond_dihedral': 0.19085307}
-     },
-    'T': {'CB': {'bond_len': 1.5260001, 'bond_angs': 1.9146265, 'bond_dihedral': 1.9588128},
-     'OG1': {'bond_len': 1.4099998, 'bond_angs': 1.9111353, 'bond_dihedral': -0.04425942},
-     'CG2': {'bond_len': 1.5260001, 'bond_angs': 1.9111353, 'bond_dihedral': -0.40258095}
-     },
-    'W': {'CB': {'bond_len': 1.526, 'bond_angs': 1.9146266, 'bond_dihedral': 1.7991103},
-     'CG': {'bond_len': 1.4950002, 'bond_angs': 2.0176008, 'bond_dihedral': -0.47886178},
-     'CD1': {'bond_len': 1.3520001, 'bond_angs': 2.1816616, 'bond_dihedral': 0.28870663},
-     'NE1': {'bond_len': 1.3810003, 'bond_angs': 1.8971729, 'bond_dihedral': 3.1415927},
-     'CE2': {'bond_len': 1.3799998, 'bond_angs': 1.9477878, 'bond_dihedral': 0.0},
-     'CZ2': {'bond_len': 1.3999999, 'bond_angs': 2.317797, 'bond_dihedral': 3.1415927},
-     'CH2': {'bond_len': 1.3999999, 'bond_angs': 2.094395, 'bond_dihedral': 3.1415927},
-     'CZ3': {'bond_len': 1.3999999, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'CE3': {'bond_len': 1.3999999, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'CD2': {'bond_len': 1.404, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}
-     },
-    'Y': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 1.732297},
-     'CG': {'bond_len': 1.5100001, 'bond_angs': 1.9896754, 'bond_dihedral': -0.49534115},
-     'CD1': {'bond_len': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.4462125},
-     'CE1': {'bond_len': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 3.141593},
-     'CZ': {'bond_len': 1.4090003, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'OH': {'bond_len': 1.3640002, 'bond_angs': 2.094395, 'bond_dihedral': 3.141593},
-     'CE2': {'bond_len': 1.4090003, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'CD2': {'bond_len': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}
-     },
-    'V': {'CB': {'bond_len': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 2.0224612},
-     'CG1': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': 0.65153766},
-     'CG2': {'bond_len': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -0.66654116}
-     },
-    '_': {}
-}
-
-# cycling around pi
-MP2SC_INFO = {
-    'A': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 2.748366}
-    },
-    'R': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 2.6976738},
-     'CG': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -2.296891752873556},
-     'CD': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -3.0688698927508753},
-     'NE': {'bond_lens': 1.463, 'bond_angs': 1.9408059, 'bond_dihedral': -3.14159265035502063196},
-     'CZ': {'bond_lens': 1.34, 'bond_angs': 2.1502457, 'bond_dihedral': -3.1146112124072474},
-     'NH1': {'bond_lens': 1.34, 'bond_angs': 2.094395, 'bond_dihedral': 0.024268176},
-     'NH2': {'bond_lens': 1.34, 'bond_angs': 2.094395, 'bond_dihedral': -3.1173246}
-    },
-    'N': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 2.8416245},
-     'CG': {'bond_lens': 1.5219998, 'bond_angs': 1.9390607, 'bond_dihedral': -2.35341984430422},
-     'OD1': {'bond_lens': 1.229, 'bond_angs': 2.101376, 'bond_dihedral': -0.087414205},
-     'ND2': {'bond_lens': 1.3349999, 'bond_angs': 2.0350537, 'bond_dihedral': -3.2290068}
-    },
-    'D': {'CB': {'bond_lens': 1.526, 'bond_angs': 1.9146265, 'bond_dihedral': 2.7741134},
-     'CG': {'bond_lens': 1.522, 'bond_angs': 1.9390608, 'bond_dihedral': -2.5010069052325647},
-     'OD1': {'bond_lens': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': -0.0678593},
-     'OD2': {'bond_lens': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': -3.209452}
-    },
-    'C': {'CB': {'bond_lens': 1.5259998, 'bond_angs': 1.9146262, 'bond_dihedral': 2.553627},
-     'SG': {'bond_lens': 1.8099997, 'bond_angs': 1.8954275, 'bond_dihedral': -2.4496057669269007}
-    },
-    'Q': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 2.7262106},
-     'CG': {'bond_lens': 1.5260003, 'bond_angs': 1.9111353, 'bond_dihedral': -2.1731813589679163},
-     'CD': {'bond_lens': 1.5219998, 'bond_angs': 1.9390606, 'bond_dihedral': -3.0375261942492884},
-     'OE1': {'bond_lens': 1.229, 'bond_angs': 2.101376, 'bond_dihedral': 0.002834766},
-     'NE2': {'bond_lens': 1.3349998, 'bond_angs': 2.0350537, 'bond_dihedral': -3.138758}
-    },
-    'E': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146267, 'bond_dihedral': 2.7813723},
-     'CG': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -2.259677235280172},
-     'CD': {'bond_lens': 1.5219998, 'bond_angs': 1.9390606, 'bond_dihedral': -3.0907722155200403},
-     'OE1': {'bond_lens': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': 0.003740118},
-     'OE2': {'bond_lens': 1.25, 'bond_angs': 2.0420356, 'bond_dihedral': -3.1378527}
-    },
-    'G': {},
-    'H': {'CB': {'bond_lens': 1.5259998, 'bond_angs': 1.9146264, 'bond_dihedral': 2.614421},
-     'CG': {'bond_lens': 1.5039998, 'bond_angs': 1.9739674, 'bond_dihedral': -2.348853890095846},
-     'ND1': {'bond_lens': 1.3850001, 'bond_angs': 2.094395, 'bond_dihedral': -0.08675759},
-     'CE1': {'bond_lens': 1.3430002, 'bond_angs': 1.8849558, 'bond_dihedral': 3.1415927},
-     'NE2': {'bond_lens': 1.335, 'bond_angs': 1.8849558, 'bond_dihedral': 0.0},
-     'CD2': {'bond_lens': 1.3940002, 'bond_angs': 1.8849558, 'bond_dihedral': 0.0}
-     },
-    'I': {'CB': {'bond_lens': 1.526, 'bond_angs': 1.9146265, 'bond_dihedral': 2.5604365},
-     'CG1': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -0.859962},
-     'CD1': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -3.0667439142810267},
-     'CG2': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -3.1225884596454065}
-     },
-    'L': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146265, 'bond_dihedral': 2.711971},
-     'CG': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -1.9031136671649378},
-     'CD1': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': 2.4652872},
-     'CD2': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -1.9555614630328577}
-     },
-    'K': {'CB': {'bond_lens': 1.526, 'bond_angs': 1.9146266, 'bond_dihedral': 2.7441595},
-     'CG': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -2.2560017744647425},
-     'CD': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': -3.0881102720843714},
-     'CE': {'bond_lens': 1.526, 'bond_angs': 1.9111353, 'bond_dihedral': 3.092959},
-     'NZ': {'bond_lens': 1.4710001, 'bond_angs': 1.940806, 'bond_dihedral': 3.0515378}
-     },
-    'M': {'CB': {'bond_lens': 1.526, 'bond_angs': 1.9146264, 'bond_dihedral': 2.7051392},
-     'CG': {'bond_lens': 1.526, 'bond_angs': 1.9111354, 'bond_dihedral': -2.1267417112933558},
-     'SD': {'bond_lens': 1.8099998, 'bond_angs': 2.001892, 'bond_dihedral': 3.1411812},
-     'CE': {'bond_lens': 1.8099998, 'bond_angs': 1.7261307, 'bond_dihedral': -0.048235133}
-     },
-    'F': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 2.545154},
-     'CG': {'bond_lens': 1.5100001, 'bond_angs': 1.9896755, 'bond_dihedral': -2.343391720448629},
-     'CD1': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.5108389},
-     'CE1': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 3.1415927},
-     'CZ': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'CE2': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'CD2': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}
-     },
-    'P': {'CB': {'bond_lens': 1.5260001, 'bond_angs': 1.9146266, 'bond_dihedral': 3.0584893},
-     'CG': {'bond_lens': 1.5260001, 'bond_angs': 1.9111352, 'bond_dihedral': 0.024303282},
-     'CD': {'bond_lens': 1.5260001, 'bond_angs': 1.9111352, 'bond_dihedral': 0.0037610964}
-     },
-    'S': {'CB': {'bond_lens': 1.5260001, 'bond_angs': 1.9146266, 'bond_dihedral': 2.6017702},
-     'OG': {'bond_lens': 1.41, 'bond_angs': 1.9111352, 'bond_dihedral': 2.85091}
-     },
-    'T': {'CB': {'bond_lens': 1.5260001, 'bond_angs': 1.9146265, 'bond_dihedral': 2.4884229},
-     'OG1': {'bond_lens': 1.4099998, 'bond_angs': 1.9111353, 'bond_dihedral': -0.04425942},
-     'CG2': {'bond_lens': 1.5260001, 'bond_angs': 1.9111353, 'bond_dihedral': -2.355398480092184}
-    },
-    'W': {'CB': {'bond_lens': 1.526, 'bond_angs': 1.9146266, 'bond_dihedral': 2.6109421},
-     'CG': {'bond_lens': 1.4950002, 'bond_angs': 2.0176008, 'bond_dihedral': -2.529051129017965},
-     'CD1': {'bond_lens': 1.3520001, 'bond_angs': 2.1816616, 'bond_dihedral': 0.28870663},
-     'NE1': {'bond_lens': 1.3810003, 'bond_angs': 1.8971729, 'bond_dihedral': 3.1415927},
-     'CE2': {'bond_lens': 1.3799998, 'bond_angs': 1.9477878, 'bond_dihedral': 0.0},
-     'CZ2': {'bond_lens': 1.3999999, 'bond_angs': 2.317797, 'bond_dihedral': 3.1415927},
-     'CH2': {'bond_lens': 1.3999999, 'bond_angs': 2.094395, 'bond_dihedral': 3.1415927},
-     'CZ3': {'bond_lens': 1.3999999, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'CE3': {'bond_lens': 1.3999999, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'CD2': {'bond_lens': 1.404, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}
-     },
-    'Y': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 2.5424516},
-     'CG': {'bond_lens': 1.5100001, 'bond_angs': 1.9896754, 'bond_dihedral': -2.3754170576678675},
-     'CD1': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.4462125},
-     'CE1': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 3.141593},
-     'CZ': {'bond_lens': 1.4090003, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'OH': {'bond_lens': 1.3640002, 'bond_angs': 2.094395, 'bond_dihedral': 3.141593},
-     'CE2': {'bond_lens': 1.4090003, 'bond_angs': 2.094395, 'bond_dihedral': 0.0},
-     'CD2': {'bond_lens': 1.3999997, 'bond_angs': 2.094395, 'bond_dihedral': 0.0}
-    },
-    'V': {'CB': {'bond_lens': 1.5260003, 'bond_angs': 1.9146266, 'bond_dihedral': 2.4783485},
-     'CG1': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -2.9864359537707728},
-     'CG2': {'bond_lens': 1.5260003, 'bond_angs': 1.9111352, 'bond_dihedral': -0.66654116}
-    },
-
-    '_': {}
-}
 
 # modified manually to match the mode
 MP3SC_INFO = {
@@ -787,7 +691,7 @@ MP3SC_INFO = {
     },
     'P': {'CB': {'bond_lens': 1.5260001, 'bond_angs': 1.9146266, 'bond_dihedral': 3.141592},
      'CG': {'bond_lens': 1.5260001, 'bond_angs': 1.9111352, 'bond_dihedral': -0.707}, # bimodal at -0.7, 0.7
-     'CD': {'bond_lens': 1.5260001, 'bond_angs': 1.9111352, 'bond_dihedral': -0.85} # bimodal at -0.85, 0.85
+     'CD': {'bond_lens': 1.5260001, 'bond_angs': 1.9111352, 'bond_dihedral': 0.85} # bimodal at -0.85, 0.85
     },
     'S': {'CB': {'bond_lens': 1.5260001, 'bond_angs': 1.9146266, 'bond_dihedral': 2.6017702},
      'OG': {'bond_lens': 1.41, 'bond_angs': 1.9111352, 'bond_dihedral': 1.1}
@@ -824,9 +728,19 @@ MP3SC_INFO = {
     '_': {}
 }
 
+# experimentally checked distances
+FF = {"MIN_DISTS": {1: 1.180, # shortest =N or =O bond
+                    2: 2.138, # N-N in histidine group
+                    3: 2.380}, # N-N in backbone (N-CA-C-N) 
+      "MAX_DISTS": {i: 1.840*i for i in range(1, 5+1)} # 1.84 is longest -S bond found,
+     } 
 
-
-
+ATOM_TOKEN_IDS = set(["", "N", "CA", "C", "O"])
+ATOM_TOKEN_IDS = {k: i for i,k in enumerate(sorted( 
+                    ATOM_TOKEN_IDS.union( set(
+                        [name for k,v in SC_BUILD_INFO.items() for name in v["atom-names"]]
+                    ) )
+                ))}
 
 #################
 ##### DOERS #####
@@ -837,70 +751,84 @@ def make_cloud_mask(aa):
     mask = np.zeros(14)
     if aa != "_":
         n_atoms = 4+len( SC_BUILD_INFO[aa]["atom-names"] )
-        mask[:n_atoms] = 1
+        mask[:n_atoms] = True
     return mask
 
 def make_bond_mask(aa):
     """ Gives the length of the bond originating each atom. """
     mask = np.zeros(14)
     # backbone
-    mask[0] = BB_BUILD_INFO["BONDLENS"]['c-n']
-    mask[1] = BB_BUILD_INFO["BONDLENS"]['n-ca']
-    mask[2] = BB_BUILD_INFO["BONDLENS"]['ca-c']
-    mask[3] = BB_BUILD_INFO["BONDLENS"]['c-o']
-    # sidechain - except padding token 
-    if aa in SC_BUILD_INFO.keys():
-        for i,bond in enumerate(SC_BUILD_INFO[aa]['bonds-vals']):
-            mask[4+i] = bond
+    if aa != "_":
+        mask[0] = BB_BUILD_INFO["BONDLENS"]['c-n']
+        mask[1] = BB_BUILD_INFO["BONDLENS"]['n-ca']
+        mask[2] = BB_BUILD_INFO["BONDLENS"]['ca-c']
+        mask[3] = BB_BUILD_INFO["BONDLENS"]['c-o']
+        # sidechain - except padding token 
+        if aa in SC_BUILD_INFO.keys():
+            for i,bond in enumerate(SC_BUILD_INFO[aa]['bonds-vals']):
+                mask[4+i] = bond
     return mask
 
 def make_theta_mask(aa):
     """ Gives the theta of the bond originating each atom. """
     mask = np.zeros(14)
     # backbone
-    mask[0] = BB_BUILD_INFO["BONDANGS"]['ca-c-n'] # nitrogen
-    mask[1] = BB_BUILD_INFO["BONDANGS"]['c-n-ca'] # c_alpha
-    mask[2] = BB_BUILD_INFO["BONDANGS"]['n-ca-c'] # carbon
-    mask[3] = BB_BUILD_INFO["BONDANGS"]['ca-c-o'] # oxygen
-    # sidechain
-    for i,theta in enumerate(SC_BUILD_INFO[aa]['angles-vals']):
-        mask[4+i] = theta
+    if aa != "_":
+        mask[0] = BB_BUILD_INFO["BONDANGS"]['ca-c-n'] # nitrogen
+        mask[1] = BB_BUILD_INFO["BONDANGS"]['c-n-ca'] # c_alpha
+        mask[2] = BB_BUILD_INFO["BONDANGS"]['n-ca-c'] # carbon
+        mask[3] = BB_BUILD_INFO["BONDANGS"]['ca-c-o'] # oxygen
+        # sidechain
+        for i,theta in enumerate(SC_BUILD_INFO[aa]['angles-vals']):
+            mask[4+i] = theta
     return mask
 
 def make_torsion_mask(aa, fill=False):
     """ Gives the dihedral of the bond originating each atom. """
     mask = np.zeros(14)
-    # backbone
-    mask[0] = BB_BUILD_INFO["BONDTORSIONS"]['n-ca-c-n'] # psi
-    mask[1] = BB_BUILD_INFO["BONDTORSIONS"]['ca-n-c-ca'] # omega
-    mask[2] = BB_BUILD_INFO["BONDTORSIONS"]['c-n-ca-c'] # psi
-    mask[3] = BB_BUILD_INFO["BONDTORSIONS"]['n-ca-c-o'] # oxygen
-    # sidechain
-    for i, torsion in enumerate(SC_BUILD_INFO[aa]['torsion-vals']):
-        if fill: 
-            mask[4+i] = MP3SC_INFO[aa][ SC_BUILD_INFO[aa]["atom-names"][i] ]["bond_dihedral"]
-        else: 
-            # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L372
-            # 999 is an anotation -- change later 
-            mask[4+i] = np.nan if torsion == 'p' else 999 if torsion == "i" else torsion
+    if aa != "_":
+        # backbone
+        mask[0] = BB_BUILD_INFO["BONDTORSIONS"]['n-ca-c-n'] # psi
+        mask[1] = BB_BUILD_INFO["BONDTORSIONS"]['ca-n-c-ca'] # omega
+        mask[2] = BB_BUILD_INFO["BONDTORSIONS"]['c-n-ca-c'] # psi
+        mask[3] = BB_BUILD_INFO["BONDTORSIONS"]['n-ca-c-o'] # oxygen
+        # sidechain
+        for i, torsion in enumerate(SC_BUILD_INFO[aa]['torsion-vals']):
+            if fill: 
+                mask[4+i] = MP3SC_INFO[aa][ SC_BUILD_INFO[aa]["atom-names"][i] ]["bond_dihedral"]
+            else: 
+                # https://github.com/jonathanking/sidechainnet/blob/master/sidechainnet/structure/StructureBuilder.py#L372
+                # 999 is an anotation -- change later || same for 555
+                mask[4+i] = np.nan if torsion == 'p' else 999 if torsion == "i" else torsion
     return mask
 
 def make_idx_mask(aa):
     """ Gives the idxs of the 3 previous points. """
     mask = np.zeros((11, 3))
-    # backbone
-    mask[0, :] = np.arange(3) 
-    # sidechain
-    mapper = {"N": 0, "CA": 1, "C":2,  "CB": 4}
-    for i, torsion in enumerate(SC_BUILD_INFO[aa]['torsion-names']):
-        # get all the atoms forming the dihedral
-        torsions = [x.rstrip(" ") for x in torsion.split("-")]
-        # for each atom
-        for n, torsion in enumerate(torsions[:-1]):
-            # get the index of the atom in the coords array
-            loc = mapper[torsion] if torsion in mapper.keys() else 4 + SC_BUILD_INFO[aa]['atom-names'].index(torsion)
-            # set position to index
-            mask[i+1][n] = loc
+    if aa != "_":
+        # backbone
+        mask[0, :] = np.arange(3) 
+        # sidechain
+        mapper = {"N": 0, "CA": 1, "C":2,  "CB": 4}
+        for i, torsion in enumerate(SC_BUILD_INFO[aa]['torsion-names']):
+            # get all the atoms forming the dihedral
+            torsions = [x.rstrip(" ") for x in torsion.split("-")]
+            # for each atom
+            for n, torsion in enumerate(torsions[:-1]):
+                # get the index of the atom in the coords array
+                loc = mapper[torsion] if torsion in mapper.keys() else 4 + SC_BUILD_INFO[aa]['atom-names'].index(torsion)
+                # set position to index
+                mask[i+1][n] = loc
+    return mask
+
+def make_atom_token_mask(aa):
+    """ Return the tokens for each atom in the aa. """
+    mask = np.zeros(14)
+    # get atom id
+    if aa != "_":
+        atom_list = ["N", "CA", "C", "O"] + SC_BUILD_INFO[ aa ]["atom-names"]
+        for i,atom in enumerate(atom_list):
+            mask[i] = ATOM_TOKEN_IDS[atom]
     return mask
 
 
@@ -915,10 +843,8 @@ SUPREME_INFO = {k: {"cloud_mask": make_cloud_mask(k),
                     "torsion_mask": make_torsion_mask(k),
                     "torsion_mask_filled": make_torsion_mask(k, fill=True),
                     "idx_mask": make_idx_mask(k),
+                    "atom_token_mask": make_atom_token_mask(k),
+                    "rigid_idx_mask": SC_BUILD_INFO[k]['rigid-frames-idxs'],
                     } 
                 for k in INDEX2AAS}
-
-
-
-
 
