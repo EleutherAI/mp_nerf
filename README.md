@@ -2,7 +2,11 @@
 
 This is the code for the paper "[MP-NeRF: A Massively Parallel Method for Accelerating Protein Structure Reconstruction from Internal Coordinates](https://www.biorxiv.org/content/10.1101/2021.06.08.446214v1)"
 
-The code can be installed via `pip` with `pip install mp-nerf` 
+The code can be installed via `pip` with 
+
+```bash
+$ pip install mp-nerf 
+``` 
 
 ## Abstract
 
