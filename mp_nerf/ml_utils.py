@@ -78,76 +78,155 @@ def rename_symmetric_atoms(pred_coors, true_coors, seq_list, cloud_mask, pred_fe
     return pred_coors, pred_feats 
 
 
-def torsion_angle_loss(pred_torsions, true_torsions, coeff=2., angle_mask=None): 
+def angle_to_point_in_circum(angles): 
+    """ Converts an angle to a point in the unit circumference. 
+        Inputs: 
+        * angles: tensor of (any) shape. 
+        Outputs: (any, 2)
+    """
+    # ensure no last dummy dim
+    if len(angles.shape) == 0:
+        angles = angles.unsqueeze(0)
+    elif angles.shape[-1] == 1 and len(angles.shape) > 1 : 
+        angles = angles[..., 0]
+
+    return torch.stack([torch.cos(angles), torch.sin(angles)], dim=-1)
+
+def point_in_circum_to_angle(points): 
+    """ Converts a point in the circumference to an angle 
+        Inputs: 
+        * poits: (any, 2) 
+        Outputs: (any)
+    """
+    # ensure first dim
+    if len(points.shape) == 1: 
+        points = points.unsqueeze(0)
+
+    return torch.atan2(points[..., points.shape[-1] // 2:],
+                       points[..., :points.shape[-1] // 2] )
+
+
+def torsion_angle_loss(pred_torsions=None, true_torsions=None, 
+                       pred_points=None,  true_points=None, 
+                       alt_true_points=None, alt_true_torsions=None,
+                       coeff=2., norm_coeff=1e-2, angle_mask=None): 
     """ Computes a loss on the angles as the cosine of the difference.
-        Due to angle periodicity, calculate the disparity on both sides
+        Equivalent to an L2 on the unit circle.
+        Due to angle periodicity, for angle inputs, calculate the 
+        disparity on both sides.
+        Alternative truths should only be passed if not previous renaming.
         Inputs: 
         * pred_torsions: ( (B), L, X ) float. Predicted torsion angles.(-pi, pi)
                                        Same format as sidechainnet. 
         * true_torsions: ( (B), L, X ) true torsion angles. (-pi, pi)
+        * pred_points: ( (B), L, X, 2) float. Predicted points in circum.
+        * true_points: ( (B), L, X, 2) float. true points in circum. 
+        * alt_true_torsions: ( (B), L, X ) alt true torsion angles. (-pi, pi)
+        * alt_true_points: ( (B), L, X, 2) float. alt true points in circum.
         * coeff: float. weight coefficient
+        * norm_coeff: float. coefficient for norm term. avoids big outputs.
         * angle_mask: ((B), L, (X)) bool. Masks the non-existing angles. 
-
-        Outputs: ( (B), L, 6 ) cosine difference
+        Outputs: ( (B), L*X_masked ) 2*cosine difference + 0.02*norm
     """
-    l_normal = torch.cos( pred_torsions - true_torsions )
-    l_cycle = torch.cos( to_zero_two_pi(pred_torsions) - \
-                         to_zero_two_pi(true_torsions) )
-    maxi = torch.max( l_normal, l_cycle )
-    if angle_mask is not None: 
-        maxi[angle_mask] = 1.
-    return coeff * (1 - maxi)
+    # convert to sin·cos rep if not available
+    if pred_torsions is not None and pred_points is None:
+        pred_points = angle_to_point_in_circum(pred_torsions) 
+    if true_torsions is not None and true_points is None:
+        true_points = angle_to_point_in_circum(true_torsions) 
+    if alt_true_torsions is not None and alt_true_points is None:
+        alt_true_points = angle_to_point_in_circum(alt_true_torsions) 
+
+    # calc norm of angles
+    norm = torch.norm(pred_points, dim=-1)
+    angle_norm_loss = norm_coeff * (1-norm).abs()
+
+    # do L2 on unit circle
+    pred_points = pred_points / norm.unsqueeze(-1)
+    torsion_loss = torch.pow(pred_points - true_points, 2).sum(dim=-1)
+
+    if alt_true_points is not None: 
+        torsion_loss = torch.minimum( 
+            torsion_loss, 
+            torch.pow(pred_points - alt_true_points, 2).sum(dim=-1)
+        )
+    if coeff != 2.:
+        torsion_loss *= coeff/2 
+
+    if angle_mask is None: 
+        angle_mask = torch.ones(*pred_points.shape[:-1], dtype=torch.bool)
+
+    return (torsion_loss + angle_norm_loss)[angle_mask]
 
 
-def fape_torch(pred_coords, true_coords, max_val=10., l_func=None,
-               c_alpha=False, seq_list=None, rot_mats_g=None): 
+def fape_torch(pred_coords, true_coords, max_val=10., d_clamp=10., l_func=None, 
+               partial=None, seq_list=None, rot_mats_g=None, max_points=10000): 
     """ Computes the Frame-Aligned Point Error. Scaled 0 <= FAPE <= 1
+        Even if computed only on C-alphas, all backbone atoms (N-CA-C)
+        must be passed to build the frames.
         Inputs: 
-        * pred_coords: (B, L, C, 3) predicted coordinates. 
-        * true_coords: (B, L, C, 3) ground truth coordinates. 
-        * max_val: maximum value (it's also the radius due to L1 usage)
-        * l_func: function. allow for options other than l1 (consider dRMSD)
-        * c_alpha: bool. whether to only calculate frames and loss from c_alphas
+        * pred_coords: (B, L, C, 3) or (B, (l c), 3) predicted coordinates. 
+        * true_coords: (B, L, C, 3) or (B, (l c), 3) ground truth coordinates. 
+        * max_val: float. number to divide by - the final loss
+        * d_clamp: float. the radius due to L1 usage
+        * l_func: function. allow for options other than l1 (consider dRMSD maybe)
+        * partial: str or None. one of ["c_alpha"].
         * seq_list: list of strs (FASTA sequences). to calculate rigid bodies' indexs.
                     Defaults to C-alpha if not passed.
         * rot_mats_g: optional. List of n_seqs x (N_frames, 3, 3) rotation matrices.
-
+        * max_points: int. maximum points to rotate at once. 
+                      the higher, the more batching allowed.
         Outputs: (B, N_atoms) 
     """
     fape_store = []
     if l_func is None: 
-        l_func = lambda x,y,eps=1e-7,sup=max_val: (((x-y)**2).sum(dim=-1) + eps).sqrt() 
+        l_func = lambda x,y,eps=1e-7,sup=d_clamp: (((x-y)**2).sum(dim=-1) + \
+                                                   eps).sqrt().clamp(0, sup)
     # for chain
     for s in range(pred_coords.shape[0]):  
         fape_store.append(0)
         cloud_mask = (torch.abs(true_coords[s]).sum(dim=-1) != 0)
-        # center both structures
+        # center both structures
         pred_center = pred_coords[s] - pred_coords[s, cloud_mask].mean(dim=0, keepdim=True)
         true_center = true_coords[s] - true_coords[s, cloud_mask].mean(dim=0, keepdim=True)
         # convert to (B, L*C, 3)
         pred_center = rearrange(pred_center, 'l c d -> (l c) d')
         true_center = rearrange(true_center, 'l c d -> (l c) d')
         mask_center = rearrange(cloud_mask, 'l c -> (l c)')
-        # get frames and conversions - same scheme as in mp_nerf proteins' concat of monomers
+        # get frames and conversions - same scheme as in mp_nerf proteins' concat of monomers
         if rot_mats_g is None:
-            rigid_idxs = scn_rigid_index_mask(seq_list[s], c_alpha=c_alpha)  
-            true_frames = get_axis_matrix(*true_center[rigid_idxs].detach(), norm=True)
-            pred_frames = get_axis_matrix(*pred_center[rigid_idxs].detach(), norm=True)
-            rot_mats  = torch.matmul(torch.transpose(pred_frames, -1, -2), true_frames)
+            rigid_idxs = scn_rigid_index_mask(seq_list[s], c_alpha=partial==c_alpha)  
+            true_frames = get_axis_matrix(*true_center[rigid_idxs], norm=True)
+            pred_frames = get_axis_matrix(*pred_center[rigid_idxs], norm=True)
+            rot_mats  = torch.matmul(torch.transpose(pred_frames, -1, -2), true_frames).detach()
         else: 
             rot_mats = rot_mats_g[s]
 
         # calculate loss only on c_alphas
-        if c_alpha:
-            mask_center[:] = False
-            mask_center[rigid_idxs[1]] = True
+        if partial is not None:
+            mask_center = torch.zeros_like(mask_center, dtype=torch.bool)
+            if partial == "c_alpha": # only keep c-alphas
+                mask_center[np.arange(0, pred_coords.shape[1]) * 14 + 1] = \
+                mask_center[np.arange(0, pred_coords.shape[1]) * 14 + 1] + True 
+            else: # only keep backbone(+cb) frames' atoms
+                mask_center[rigid_idxs] = mask_center[rigid_idxs] + True 
 
+            pred_center = pred_center[mask_center]
+            true_center = true_center[mask_center]
+
+        # return pred_center, true_center, mask_center, rot_mats
         # measure errors - for residue
-        for i,rot_mat in enumerate(rot_mats): 
-            fape_store[s] += l_func( pred_center[s][mask_center[s]] @ rot_mat, 
-                                     true_center[s][mask_center[s]]
-                               ).clamp(0, max_val)
-        fape_store[s] /= rot_mats.shape[0]            
+        num = 0
+        batch_size = max(1, int( max_points // pred_center.shape[0] ) )
+        
+        while num <= rot_mats.shape[0]:
+            fape_store[s] = fape_store[s] + l_func( 
+                pred_center @ rot_mats[num:num+batch_size], # (L_, D)
+                true_center                                 # (L_, D)
+            ).sum(dim=0)
+            
+            num += batch_size
+
+        fape_store[s] /= rot_mats.shape[0] # take mean        
 
     # stack and average
     return (1/max_val) * torch.stack(fape_store, dim=0)

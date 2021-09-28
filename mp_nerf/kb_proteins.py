@@ -569,7 +569,6 @@ SCN_CONNECT = {
     }
 
 # from: https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-021-03819-2/MediaObjects/41586_2021_3819_MOESM1_ESM.pdf
-# added R's terminal Ns due to a small percentage of misalignments' (10%)
 AMBIGUOUS = {
     "D": {"names": [["OD1", "OD2"]], 
           "indexs": [[6, 7]], 
@@ -582,9 +581,6 @@ AMBIGUOUS = {
           },
     "Y": {"names": [["CD1", "CD2"], ["CE1", "CE2"]], 
           "indexs": [[6,10], [7,9]],
-          },
-    "R": {"names": [["NH1", "NH2"]], 
-          "indexs": [[9, 10]]
           },
 }
 

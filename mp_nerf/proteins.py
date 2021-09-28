@@ -104,14 +104,14 @@ def scn_index_mask(seq):
 def scn_rigid_index_mask(seq, c_alpha=None): 
     """ Inputs: 
         * seq: (length). iterable of 1-letter aa codes of a protein 
-        * c_alpha: bool. whether to return only the c_alpha rigid group
+        * c_alpha: part of the chain to compute frames on.
         Outputs: (3, Length * Groups). indexes for 1st, 2nd and 3rd point 
                   to construct frames for each group. 
     """
-    if c_alpha: 
-        return torch.cat([torch.tensor(SUPREME_INFO[aa]['rigid_idx_mask'])[:1] + 14*i \
-                          for i,aa in enumerate(seq)], dim=0).t()
-    return torch.cat([torch.tensor(SUPREME_INFO[aa]['rigid_idx_mask']) + 14*i \
+    maxi = 1 if c_alpha else None
+
+    return torch.cat([torch.tensor(SUPREME_INFO[aa]['rigid_idx_mask'])[:maxi] if i==0 else \
+                      torch.tensor(SUPREME_INFO[aa]['rigid_idx_mask'])[:maxi] + 14*i \
                       for i,aa in enumerate(seq)], dim=0).t()
 
 
@@ -366,7 +366,7 @@ def sidechain_fold(wrapper, cloud_mask, point_ref_mask, angles_mask, bond_mask,
     # parallel sidechain - do the oxygen, c-beta and side chain
     for i in range(3,14):
         # skip cbeta if arg is set
-        if i == 4 and not c_beta:
+        if i == 4 and not isinstance(c_beta, str):
             continue
         # prepare inputs
         level_mask = cloud_mask[:, i]
@@ -392,3 +392,145 @@ def sidechain_fold(wrapper, cloud_mask, point_ref_mask, angles_mask, bond_mask,
                                                thetas, dihedrals)
     
     return wrapper, cloud_mask
+
+
+##############################
+####### XTENSION  ############
+##############################
+
+
+# inspired by: https://www.biorxiv.org/content/10.1101/2021.08.02.454840v1
+def ca_from_angles(angles, bond_len=3.80): 
+    """ Builds a C-alpha trace from a set of 2 angles (theta, chi). 
+        Inputs: 
+        * angles: (B, L, 4): float tensor. (cos, sin) · (theta, chi)
+                  angles in point-in-unit-circumference format. 
+        Outputs: (B, L, 3) coords for c-alpha trace
+    """
+    device = angles.device
+    length = angles.shape[-2]
+    frames = [ torch.repeat_interleave(
+                torch.eye(3, device=device, dtype=torch.double).unsqueeze(0), 
+                angles.shape[0], 
+                dim=0
+             )]
+
+    rot_mats = torch.stack([ 
+        torch.stack([  angles[...,0] * angles[...,2], angles[...,0] * angles[...,3], -angles[...,1]    ], dim=-1),
+        torch.stack([ -angles[...,3]                , angles[...,2]                ,  angles[...,0]*0. ], dim=-1),
+        torch.stack([  angles[...,1] * angles[...,2], angles[...,1] * angles[...,3],  angles[...,0]    ], dim=-1),
+    ], dim=-2)  # (B, L, 3, 3)
+
+    # iterative update of frames - skip last frame. 
+    for i in range(length-1): 
+        frames.append( rot_mats[:, i] @ frames[i] ) # could do frames[-1] as well
+    frames = torch.stack(frames, dim=1) # (B, L, 3, 3)
+        
+    ca_trace = bond_len * frames[..., -1, :].cumsum(dim=-2) # (B, L, 3)
+
+    return ca_trace, frames
+
+
+# inspired by: https://github.com/psipred/DMPfold2/blob/master/dmpfold/network.py#L139
+def ca_bb_fold(ca_trace): 
+    """ Calcs a backbone given the coordinate trace of the CAs. 
+        Inputs: 
+        * ca_trace: (B, L, 3) float tensor with CA coordinates. 
+        Outputs: (B, L, 14, 3) (-N-CA(-CB-...)-C(=O)-)
+    """
+    wrapper = torch.zeros(ca_trace.shape[0], ca_trace.shape[1]+2, 14, 3, device=ca_trace.device)
+    wrapper[:, 1:-1, 1] = ca_trace
+    # Place dummy extra Cα atoms on extremenes to get the required vectors
+    vecs = ca_trace[ :, [0, 2, -1, -3] ] - ca_trace[ :, [1, 1, -2, -2] ] # (B, 4, 3)
+    wrapper[:,  0, 1] = ca_trace[:,  0] + 3.80 * F.normalize(torch.cross(vecs[:, 0], vecs[:, 1]), dim=-1)
+    wrapper[:, -1, 1] = ca_trace[:, -1] + 3.80 * F.normalize(torch.cross(vecs[:, 2], vecs[:, 3]), dim=-1)
+    
+    # place N and C term
+    vec_ca_can = wrapper[:, :-2, 1] - wrapper[:, 1:-1, 1]
+    vec_ca_cac = wrapper[:, 2: , 1] - wrapper[:, 1:-1, 1]
+    mid_ca_can = (wrapper[:, 1:, 1] + wrapper[:, :-1, 1]) / 2
+    cross_vcan_vcac = F.normalize(torch.cross(vec_ca_can, vec_ca_cac, dim=-1), dim=-1)
+    wrapper[:, 1:-1, 0] = mid_ca_can[:, :-1] - vec_ca_can / 7.5 + cross_vcan_vcac / 3.33
+    # placve all C but last, which is special
+    wrapper[:, 1:-2, 2] = (mid_ca_can[:, :-1] + vec_ca_can / 8 - cross_vcan_vcac / 2.5)[:, 1:]
+    wrapper[:,   -2, 2] = mid_ca_can[:, -1, :] - vec_ca_cac[:, -1, :] / 8 + cross_vcan_vcac[:, -1, :] / 2.5
+
+    return wrapper[:, 1:-1]
+
+
+
+############################
+####### METRICS ############
+############################
+
+
+def get_protein_metrics(
+        true_coords,
+        pred_coords, 
+        cloud_mask = None,
+        return_aligned = True, 
+        detach = None 
+    ): 
+    """ Calculates many metrics for protein structure quality.
+        Aligns coordinates.
+        Inputs: 
+        * true_coords: (B, L, 14, 3) unaligned coords (B = 1)
+        * pred_coords: (B, L, 14, 3) unaligned coords (B = 1)
+        * cloud_mask: (B, L, 14) bool. gotten from pred_coords if not passed
+        * return_aligned: bool. whether to return aligned structs.
+        * detach: bool. whether to detach inputs before compute. saves mem
+        Outputs: dict (k,v)
+    """
+    metric_dict = {
+        "rmsd": RMSD,
+        "drmsd": dRMSD,
+        # not implemented yet
+        # "gdt_ts": partial(GDT, mode="TS"),
+        # "gdt_ha": partial(GDT, mode="HA"),
+        # "tmscore": tmscore_torch,
+        # "lddt": lddt_torch,
+    }
+
+    if detach:
+        true_coords = true_coords.detach()
+        pred_coords = pred_coords.detach()
+
+    # clone so originals are not modified
+    true_coords = true_coords.clone()
+    pred_coords = pred_coords.clone()
+    cloud_mask = pred_coords.abs().sum(dim=-1).bool() * \
+                 true_coords.abs().sum(dim=-1).bool() # 1, L, 14
+    chain_mask = cloud_mask.sum(dim=-1).bool() # 1, L
+
+    true_aligned, pred_aligned = Kabsch(
+        pred_coords[cloud_mask].t(), true_coords[cloud_mask].t()
+    )
+    # no need to rebuild true coords since unaffected by kabsch
+    true_coords[cloud_mask] = true_aligned.t()
+    pred_coords[cloud_mask] = pred_aligned.t()
+
+    # compute metrics
+    outputs = {}
+    for k,f in metric_dict.items(): 
+        # special. works only on ca trace
+        if k == "tmscore": 
+            ca_trace = true_coords[:, :, 1].transpose(-1, -2)
+            ca_pred_trace = pred_coords[:, :, 1].transpose(-1, -2)
+            outputs[k] = f(ca_trace, ca_pred_trace)
+        # special. works on full prot
+        elif k == "lddt": 
+            outputs[k] = f(true_coords[:, chain_mask[0]], pred_coords[:, chain_mask[0]], cloud_mask=cloud_mask)
+        # special. needs batch dim
+        elif "gdt" in k: 
+            outputs[k] = f(true_aligned[None, ...], pred_aligned[None, ...])
+        else: 
+            outputs[k] = f(true_aligned, pred_aligned)
+
+    if return_aligned:
+        outputs.update({
+            "pred_align_wrap": pred_coords, 
+            "true_align_wrap": true_coords,
+        })
+
+    return outputs
+
