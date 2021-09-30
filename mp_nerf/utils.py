@@ -1,4 +1,5 @@
 # Author: Eric Alcaide
+import urllib
 
 import torch
 import numpy as np 
@@ -44,11 +45,18 @@ def get_prot(dataloader_=None, vocab_=None, min_len=80, max_len=150,
         (seq_str, int_seq, coords, angles, padding_seq, mask, pid)
     """
     if xray_filter: 
-        raise NotImplementedError
+        with urllib.request.urlopen("https://gist.githubusercontent.com/hypnopump/a05772052b823d7cb9fde0949d558589/raw/948c35c221fef096eb9760d532675888722478d6/xray_pdb_codes.txt") as f: 
+            lines = f.read().decode().split("\n")
+        xray_ids = set([line.replace("\n", "") for line in lines])
 
     while True:
         for b,batch in enumerate(dataloader_[subset]):
             for i in range(batch.int_seqs.shape[0]):
+                # skip not xray
+                if xray_filter: 
+                    if batch.pids[i].split("#")[-1][:4].upper() not in xray_ids: 
+                        continue
+
                 # skip too short
                 if batch.int_seqs[i].shape[0] < min_len:
                     continue
