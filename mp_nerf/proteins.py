@@ -28,7 +28,7 @@ def scn_cloud_mask(seq, coords=None, strict=False):
                         if start[b, pos, chain].item() == 0:
                             start[b, pos, chain:] *= 0
         return start
-    return torch.tensor([SUPREME_INFO[aa]['cloud_mask'] for aa in seq])
+    return torch.tensor(np.array([SUPREME_INFO[aa]['cloud_mask'] for aa in seq]))
 
 
 def scn_bond_mask(seq):
@@ -36,7 +36,7 @@ def scn_bond_mask(seq):
         * seqs: (length). iterable of 1-letter aa codes of a protein
         Outputs: (L, 14) maps point to bond length
     """ 
-    return torch.tensor([SUPREME_INFO[aa]['bond_mask'] for aa in seq])
+    return torch.tensor(np.array([SUPREME_INFO[aa]['bond_mask'] for aa in seq]))
 
 
 def scn_angle_mask(seq, angles=None, device=None):
@@ -50,8 +50,8 @@ def scn_angle_mask(seq, angles=None, device=None):
     precise = angles.dtype if angles is not None else torch.get_default_dtype()
     torsion_mask_use = "torsion_mask" if angles is not None else "torsion_mask_filled"
     # get masks
-    theta_mask   = torch.tensor([SUPREME_INFO[aa]['theta_mask'] for aa in seq], dtype=precise).to(device)
-    torsion_mask = torch.tensor([SUPREME_INFO[aa][torsion_mask_use] for aa in seq], dtype=precise).to(device)
+    theta_mask   = torch.tensor(np.array([SUPREME_INFO[aa]['theta_mask'] for aa in seq]), dtype=precise).to(device)
+    torsion_mask = torch.tensor(np.array([SUPREME_INFO[aa][torsion_mask_use] for aa in seq]), dtype=precise).to(device)
     
     # adapt general to specific angles if passed
     if angles is not None: 
@@ -97,7 +97,7 @@ def scn_index_mask(seq):
         Outputs: (L, 11, 3) maps point to theta and dihedral.
                  first angle is theta, second is dihedral
     """ 
-    idxs = torch.tensor([SUPREME_INFO[aa]['idx_mask'] for aa in seq])
+    idxs = torch.tensor(np.array([SUPREME_INFO[aa]['idx_mask'] for aa in seq]))
     return rearrange(idxs, 'l s d -> d l s')
 
 
