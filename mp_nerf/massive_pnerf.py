@@ -55,7 +55,7 @@ def mp_nerf_torch(a, b, c, l, theta, chi):
     n_plane  = torch.cross(ba, cb, dim=-1)
     n_plane_ = torch.cross(n_plane, cb, dim=-1)
     rotate   = torch.stack([cb, n_plane_, n_plane], dim=-1)
-    rotate  /= torch.norm(rotate, dim=-2, keepdim=True)
+    rotate  = rotate / torch.norm(rotate, dim=-2, keepdim=True)
     # calc proto point, rotate. add (-1 for sidechainnet convention)
     # https://github.com/jonathanking/sidechainnet/issues/14
     d = torch.stack([-torch.cos(theta),
